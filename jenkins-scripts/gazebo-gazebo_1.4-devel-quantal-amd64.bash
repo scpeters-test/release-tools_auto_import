@@ -6,4 +6,4 @@ SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
 export BUILD_SH_SCRIPT="build-gazebo1.4-quantal.sh"
 
-. ${SCRIPT_DIR}/lib/generator-quantal.sh
+. ${SCRIPT_DIR}/generators/generator-quantal.sh
