@@ -84,6 +84,8 @@ cat > build.sh << DELIM
 ${BUILD_SH_SCRIPT}
 DELIM
 
+cat build.sh
+
 ###################################################
 
 sudo $WORKSPACE/pbuilder  --execute \
