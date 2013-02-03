@@ -80,11 +80,7 @@ fi
 # DO NOT MODIFY
 ###################################################
 
-cat > build.sh << DELIM
-${BUILD_SH_SCRIPT}
-DELIM
-
-cat build.sh
+eval ${BUILD_SH_SCRIPT}
 
 ###################################################
 

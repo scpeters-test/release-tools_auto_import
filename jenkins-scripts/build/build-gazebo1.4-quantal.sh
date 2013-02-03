@@ -1,3 +1,4 @@
+cat > build.sh << DELIM
 ###################################################
 # Make project-specific changes here
 #
@@ -29,3 +30,4 @@ LD_LIBRARY_PATH=/opt/ros/groovy/lib make test ARGS="-VV" || true
 # Step 3: code check
 cd $WORKSPACE/gazebo
 sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
+DELIM
