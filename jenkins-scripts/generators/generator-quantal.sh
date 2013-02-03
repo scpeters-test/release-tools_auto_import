@@ -80,7 +80,9 @@ fi
 # DO NOT MODIFY
 ###################################################
 
-sh ${SCRIPT_DIR}/build/${BUILD_SH_SCRIPT}
+cat > build.sh << DELIM
+${BUILD_SH_SCRIPT}
+DELIM
 
 ###################################################
 
