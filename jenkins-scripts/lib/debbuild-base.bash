@@ -1,5 +1,11 @@
 #!/bin/bash -x
 
+# DISTRO is passed as a jenkins job parameter. If not set up
+# default to precise
+if [ -z $DISTRO ]; then
+    DISTRO=precise
+fi;
+
 ###################################################
 # Boilerplate.
 # DO NOT MODIFY
@@ -7,7 +13,7 @@
 #stop on error
 set -e
 
-distro=precise
+distro=$DISTRO
 arch=amd64
 base=/var/cache/pbuilder-$distro-$arch
 
@@ -85,15 +91,15 @@ set -ex
 apt-get install -y pbuilder debootstrap devscripts ubuntu-dev-tools mercurial debhelper reprepro wget
 
 # get ROS repo's key, to be used in creating the pbuilder chroot (to allow it to install packages from that repo)
-sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
+sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $DISTRO main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | apt-key add -
 # Also get drc repo's key, to be used in getting Gazebo
-sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu precise main" > /etc/apt/sources.list.d/drc-latest.list'
+sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu $DISTRO main" > /etc/apt/sources.list.d/drc-latest.list'
 wget http://packages.osrfoundation.org/drc.key -O - | apt-key add -
 apt-get update
 
 # Step 0: create/update distro-specific pbuilder environment
-pbuilder-dist $DISTRO $ARCH create --othermirror "deb http://packages.ros.org/ros/ubuntu precise main|deb http://packages.osrfoundation.org/drc/ubuntu precise main" --keyring /etc/apt/trusted.gpg --debootstrapopts --keyring=/etc/apt/trusted.gpg
+pbuilder-dist $DISTRO $ARCH create --othermirror "deb http://packages.ros.org/ros/ubuntu $DISTRO main|deb http://packages.osrfoundation.org/drc/ubuntu $DISTRO main" --keyring /etc/apt/trusted.gpg --debootstrapopts --keyring=/etc/apt/trusted.gpg
 
 # Step 0: Clean up
 rm -rf $WORKSPACE/build
@@ -136,8 +142,7 @@ for pkg in \${MAIN_PKGS}; do
     echo "looking for \$pkg"
     if [ -f \${pkg} ]; then
         echo "found \$pkg"
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+        ls -lash \$pkg
         FOUND_PKG=1
         break;
     fi
@@ -147,8 +152,7 @@ test \$FOUND_PKG -eq 1 || exit -1
 FOUND_PKG=0
 for pkg in \${DEBUG_PKGS}; do
     if [ -f \${pkg} ]; then
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+        ls -lash \$pkg
         FOUND_PKG=1
         break;
     fi
