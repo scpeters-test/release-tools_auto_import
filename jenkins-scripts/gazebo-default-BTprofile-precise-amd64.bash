@@ -5,5 +5,6 @@
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
 export GZ_BUILD_TYPE=Profile
+export GZ_BUILDSH_EXTRA_DEPENDENCIES="libgoogle-perftools-dev"
 
 . ${SCRIPT_DIR}/lib/gazebo-base-default.bash
