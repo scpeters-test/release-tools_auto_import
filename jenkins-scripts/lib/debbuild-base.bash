@@ -126,7 +126,7 @@ cp -a /tmp/$PACKAGE-release/ubuntu/* .
 #TODO: create non-passphrase-protected keys and remove the -uc and -us args to debuild
 debuild -S -uc -us
 
-if [ $DISTRO == "quantal" ]; then
+if [ \"$DISTRO\" == \"quantal\" ]; then
 cat > \$PBUILD_DIR/A10_run_rosdep << DELIM_ROS_DEP
 #!/bin/sh
 
