@@ -14,7 +14,7 @@ fi;
 set -e
 
 distro=$DISTRO
-arch=amd64
+arch=$ARCH
 base=/var/cache/pbuilder-$distro-$arch
 
 aptconffile=$WORKSPACE/apt.conf
@@ -94,14 +94,12 @@ apt-get install -y pbuilder fakeroot debootstrap devscripts ubuntu-dev-tools mer
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $DISTRO main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | apt-key add -
 # Also get drc repo's key, to be used in getting Gazebo
-# FIXME remember to enable this line for add the osrf repo again
-# sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu $DISTRO main" > /etc/apt/sources.list.d/drc-latest.list'
+sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu $DISTRO main" > /etc/apt/sources.list.d/drc-latest.list'
 wget http://packages.osrfoundation.org/drc.key -O - | apt-key add -
 apt-get update
 
 # Step 0: create/update distro-specific pbuilder environment
-# FIXME: remember to add osrf repo again
-pbuilder-dist $DISTRO $ARCH create --othermirror "deb http://packages.ros.org/ros/ubuntu $DISTRO main" --keyring /etc/apt/trusted.gpg --debootstrapopts --keyring=/etc/apt/trusted.gpg
+pbuilder-dist $DISTRO $ARCH create --othermirror "deb http://packages.ros.org/ros/ubuntu $DISTRO main|deb http://packages.osrfoundation.org/drc/ubuntu $DISTRO main" --keyring /etc/apt/trusted.gpg --debootstrapopts --keyring=/etc/apt/trusted.gpg
 
 # Step 0: Clean up
 rm -rf $WORKSPACE/build
@@ -146,9 +144,11 @@ pbuilder-dist $DISTRO $ARCH build ../*.dsc
 sudo apt-get install -y openssh-client
 cd /var/packages/gazebo/ubuntu
 
-MAIN_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/${PACKAGE_ALIAS}_${VERSION}${UBUNTU_VERSION}_$ARCH.deb /var/lib/jenkins/pbuilder/${DISTRO}_result/${PACKAGE_ALIAS}_${VERSION}${UBUNTU_VERSION}_$ARCH.deb"
+PKG_NAME=${PACKAGE_ALIAS}_${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
+DBG_PKG_NAME=${PACKAGE_ALIAS}-dbg_${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
 
-DEBUG_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/${PACKAGE_ALIAS}-dbg_${VERSION}${UBUNTU_VERSION}_$ARCH.deb /var/lib/jenkins/pbuilder/${DISTRO}_result/${PACKAGE_ALIAS}-dbg_${VERSION}${UBUNTU_VERSION}_$ARCH.deb"
+MAIN_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/\${PKG_NAME} /var/lib/jenkins/pbuilder/${DISTRO}_result/\${PKG_NAME}"
+DEBUG_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/\${DBG_PKG_NAME} /var/lib/jenkins/pbuilder/${DISTRO}_result/\${DBG_PKG_NAME}"
 
 FOUND_PKG=0
 for pkg in \${MAIN_PKGS}; do
