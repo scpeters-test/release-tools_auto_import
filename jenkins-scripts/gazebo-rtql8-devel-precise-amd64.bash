@@ -47,7 +47,7 @@ cd $WORKSPACE
 hg clone -b jslee http://bitbucket.org/karenliu/rtql8
 mkdir $WORKSPACE/rtql8/build
 cd $WORKSPACE/rtql8/build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS=on
 make install -j5
 
 # Step 2: configure and build
