@@ -131,7 +131,7 @@ cd $WORKSPACE/build/$PACKAGE-$VERSION
 cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/cmake/* cmake/
 # copy rest of directories
 for d in `find ./* -type d`; do
-  cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/${d} .
+cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/\${d} .
 done
 
 # Step 5: use debuild to create source package
@@ -188,6 +188,7 @@ cp $HOME/.ssh/id_rsa $WORKSPACE
 # Make project-specific changes here
 ###################################################
 
+cat build.sh
 sudo $WORKSPACE/pbuilder  --execute \
     --bindmounts "$WORKSPACE /var/packages/gazebo/ubuntu" \
     --basetgz $basetgz \
