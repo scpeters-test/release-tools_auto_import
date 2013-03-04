@@ -130,7 +130,7 @@ cd $WORKSPACE/build/$PACKAGE-$VERSION
 # cmake symlink need to specify inside contents when copied
 cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/cmake/* cmake/
 # copy rest of directories
-for d in `find ./* -type d`; do
+for d in \$(find ./* -type d); do
 cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/\${d} .
 done
 
