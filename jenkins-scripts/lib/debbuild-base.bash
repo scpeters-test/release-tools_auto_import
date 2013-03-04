@@ -130,8 +130,8 @@ cd $WORKSPACE/build/$PACKAGE-$VERSION
 # cmake symlink need to specify inside contents when copied
 cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/cmake/* cmake/
 # copy rest of directories
-for d in \$(find ./* -type d); do
-cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/\${d} .
+for d in \$(find /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY} -type d); do
+cp -a \${d} .
 done
 
 # Step 5: use debuild to create source package
