@@ -136,7 +136,7 @@ rel_dirs=\$(find . -maxdepth 1 -type d)
 # copy symlinks taking care of existing dirs
 cd $WORKSPACE/build/$PACKAGE-$VERSION
 for sym in \$rel_symlinks; do
-   if [ -L \${sym} ]; then
+   if [ -d \${sym} ]; then
      cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/\${sym}/* \${sym}/
    else
      cp -a /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/\${sym} .
