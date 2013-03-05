@@ -132,7 +132,7 @@ hg up $RELEASE_REPO_BRANCH
 # contents since trying to copy full dir will fail
 cd /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY} 
 rel_symlinks=\$(find . -maxdepth 1 -type l)
-rel_dirs=\$(find . -maxdepth 1 -type d)
+rel_dirs=\$(find ./* -maxdepth 1 -type d)
 # copy symlinks taking care of existing dirs
 cd $WORKSPACE/build/$PACKAGE-$VERSION
 for sym in \$rel_symlinks; do
