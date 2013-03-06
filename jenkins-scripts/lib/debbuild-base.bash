@@ -13,6 +13,11 @@ if [ -z $RELEASE_REPO_DIRECTORY ]; then
     RELEASE_REPO_DIRECTORY=ubuntu
 fi;
 
+NIGHTLY_MODE=false
+if [ "${SOURCE_TARBALL_URI}" = "nightly" ]; then
+    NIGHTLY_MODE=true
+fi
+
 ###################################################
 # Boilerplate.
 # DO NOT MODIFY
@@ -111,15 +116,19 @@ pbuilder-dist $DISTRO $ARCH create --othermirror "deb http://packages.ros.org/ro
 # Step 0: Clean up
 rm -rf $WORKSPACE/build
 mkdir -p $WORKSPACE/build
-
-# Step 1: Get the source tarball
 cd $WORKSPACE/build
-wget --quiet -O ${PACKAGE_ALIAS}_$VERSION.orig.tar.bz2 $SOURCE_TARBALL_URI
 
-# Step 3: unpack tarball
-rm -rf $PACKAGE-$VERSION
-tar xf ${PACKAGE_ALIAS}_$VERSION.orig.tar.bz2
-cd $PACKAGE-$VERSION
+# Step 1: Get the source (nightly builds or tarball)
+if ${NIGHTLY_MODE}; then
+  apt-get install -y mercurial
+  hg clone https://bitbucket.org/osrf/$PACKAGE
+  PACKAGE_SRC_BUILD_DIR=$PACKAGE
+else
+  wget --quiet -O ${PACKAGE_ALIAS}_$VERSION.orig.tar.bz2 $SOURCE_TARBALL_URI
+  rm -rf $PACKAGE-$VERSION
+  tar xf ${PACKAGE_ALIAS}_$VERSION.orig.tar.bz2
+  PACKAGE_SRC_BUILD_DIR=$PACKAGE-$VERSION
+fi
 
 # Step 4: add debian/ subdirectory with necessary metadata files to unpacked source tarball
 rm -rf /tmp/$PACKAGE-release
@@ -133,6 +142,18 @@ hg up $RELEASE_REPO_BRANCH
 cd $WORKSPACE/build/\$PACKAGE_SRC_BUILD_DIR
 cp -a --dereference /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/* .
 
+# [nightly] Adjust version in nightly mode
+if $NIGHTLY_MODE; then
+  UPSTREAM_VERSION=1.4.0 # TODO fix this to get latest from changelog
+  TIMESTAMP=\$(date '+%Y%m%d')
+  REV=\$(hg parents --template="{node|short}\n")
+  NIGHTLY_VERSION_SUFFIX=-\${UPSTREAM_VERSION}~hg\${TIMESTAMP}r\${REV}-${RELEASE_VERSION}~${ARCH}
+  NIGHTLY_VERSION=${PACKAGE_ALIAS}-\${NIGHTLY_VERSION_SUFFIX}
+  # Fix the changelog
+  sed -i -e 's:xxxxx:\${NIGHTLY_VERSION}:g' debian/changelog
+  # TODO: Fix CMakeLists.txt ?
+fi
+
 # Step 5: use debuild to create source package
 #TODO: create non-passphrase-protected keys and remove the -uc and -us args to debuild
 debuild -S -uc -us --source-option=--include-binaries
@@ -144,8 +165,14 @@ pbuilder-dist $DISTRO $ARCH build ../*.dsc
 sudo apt-get install -y openssh-client
 cd /var/packages/gazebo/ubuntu
 
-PKG_NAME=${PACKAGE_ALIAS}_${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
-DBG_PKG_NAME=${PACKAGE_ALIAS}-dbg_${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
+# Set proper package names
+if $NIGHTLY_MODE; then
+  PKG_NAME=\${NIGHTLY_VERSION}.deb
+  DBG_PKG_NAME=${PACKAGE_ALIAS}-dbg\${NIGHTLY_VERSION_SUFFIX}.deb
+else
+  PKG_NAME=${PACKAGE_ALIAS}_${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
+  DBG_PKG_NAME=${PACKAGE_ALIAS}-dbg-${VERSION}-${RELEASE_VERSION}~${DISTRO}_${ARCH}.deb
+fi
 
 MAIN_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/\${PKG_NAME} /var/lib/jenkins/pbuilder/${DISTRO}_result/\${PKG_NAME}"
 DEBUG_PKGS="/var/lib/jenkins/pbuilder/${DISTRO}-${ARCH}_result/\${DBG_PKG_NAME} /var/lib/jenkins/pbuilder/${DISTRO}_result/\${DBG_PKG_NAME}"
@@ -155,9 +182,8 @@ for pkg in \${MAIN_PKGS}; do
     echo "looking for \$pkg"
     if [ -f \${pkg} ]; then
         echo "found \$pkg"
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
         FOUND_PKG=1
+	ls -las \${pkg}
         break;
     fi
 done
@@ -169,8 +195,7 @@ for pkg in \${DEBUG_PKGS}; do
         # Check for correctly generated debug packages size > 2Kb
         # when not valid instructions in rules/control it generates 1.5K package
         test -z \$(find \$pkg -size +2k) && exit 1
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+	ls -las \${pkg}
         FOUND_PKG=1
         break;
     fi
