@@ -18,10 +18,11 @@ cat > build.sh << DELIM
 ###################################################
 # Make project-specific changes here
 #
+#!/usr/bin/env bash
 set -ex
 
 # Install deb-building tools
-apt-get install -y pbuilder fakeroot debootstrap devscripts dh-make ubuntu-dev-tools mercurial debhelper reprepro wget
+apt-get install -y pbuilder fakeroot debootstrap devscripts dh-make ubuntu-dev-tools mercurial debhelper reprepro wget bash
 
 # get ROS repo's key, to be used in creating the pbuilder chroot (to allow it to install packages from that repo)
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $DISTRO main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -138,8 +139,7 @@ for pkg in \${MAIN_PKGS}; do
         echo "found \$pkg"
 	# Check for correctly generated packages size > 3Kb
         test -z \$(find \$pkg -size +3k) && exit 1
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+        ls -lash \${pkg}
         FOUND_PKG=1
         break;
     fi
@@ -152,8 +152,7 @@ for pkg in \${DEBUG_PKGS}; do
         # Check for correctly generated debug packages size > 3Kb
         # when not valid instructions in rules/control it generates 1.5K package
         test -z \$(find \$pkg -size +3k) && exit 1
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+        ls -lash \${pkg}
         FOUND_PKG=1
         break;
     fi
