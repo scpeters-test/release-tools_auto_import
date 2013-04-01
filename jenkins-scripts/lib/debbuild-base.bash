@@ -95,8 +95,7 @@ cp -a --dereference /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/* .
 #TODO: create non-passphrase-protected keys and remove the -uc and -us args to debuild
 debuild --no-tgz-check -S -uc -us --source-option=--include-binaries
 
-if [ $PACKAGE != gazebo ]; then
-  if [ $DISTRO = quantal ]; then
+if [ -f /usr/bin/rosdep ]; then
 PBUILD_DIR=\$HOME/.pbuilder
 mkdir -p \$PBUILD_DIR
 cat > \$PBUILD_DIR/A10_run_rosdep << DELIM_ROS_DEP
@@ -109,7 +108,6 @@ HOME=/root rosdep init
 DELIM_ROS_DEP
 chmod a+x \$PBUILD_DIR/A10_run_rosdep
 echo "HOOKDIR=\$PBUILD_DIR" > \$HOME/.pbuilderrc
-  fi
 fi
 
 # Step 6: use pbuilder-dist to create binary package(s)
@@ -151,7 +149,7 @@ for pkg in \${DEBUG_PKGS}; do
     if [ -f \${pkg} ]; then
         # Check for correctly generated debug packages size > 3Kb
         # when not valid instructions in rules/control it generates 1.5K package
-        test -z \$(find \$pkg -size +3k) && exit 1
+        # test -z \$(find \$pkg -size +1.5k) && exit 1
         GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
         scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
         FOUND_PKG=1
