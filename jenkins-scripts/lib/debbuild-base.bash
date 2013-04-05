@@ -18,10 +18,11 @@ cat > build.sh << DELIM
 ###################################################
 # Make project-specific changes here
 #
+#!/usr/bin/env bash
 set -ex
 
 # Install deb-building tools
-apt-get install -y pbuilder fakeroot debootstrap devscripts dh-make ubuntu-dev-tools mercurial debhelper reprepro wget
+apt-get install -y pbuilder fakeroot debootstrap devscripts dh-make ubuntu-dev-tools mercurial debhelper reprepro wget bash
 
 # get ROS repo's key, to be used in creating the pbuilder chroot (to allow it to install packages from that repo)
 sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $DISTRO main" > /etc/apt/sources.list.d/ros-latest.list'
@@ -95,8 +96,6 @@ cp -a --dereference /tmp/$PACKAGE-release/${RELEASE_REPO_DIRECTORY}/* .
 #TODO: create non-passphrase-protected keys and remove the -uc and -us args to debuild
 debuild --no-tgz-check -S -uc -us --source-option=--include-binaries
 
-# Step 5.1: define a pbuilder hack to include all things needed to run from inside
-# pbuilder.
 PBUILD_DIR=\$HOME/.pbuilder
 mkdir -p \$PBUILD_DIR
 cat > \$PBUILD_DIR/A10_run_rosdep << DELIM_ROS_DEP
@@ -136,9 +135,8 @@ for pkg in \${MAIN_PKGS}; do
     if [ -f \${pkg} ]; then
         echo "found \$pkg"
 	# Check for correctly generated packages size > 3Kb
+        ls -lash \${pkg}
         test -z \$(find \$pkg -size +3k) && exit 1
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
         FOUND_PKG=1
         break;
     fi
@@ -150,9 +148,8 @@ for pkg in \${DEBUG_PKGS}; do
     if [ -f \${pkg} ]; then
         # Check for correctly generated debug packages size > 3Kb
         # when not valid instructions in rules/control it generates 1.5K package
-        # test -z \$(find \$pkg -size +1.5k) && exit 1
-        GNUPGHOME=$WORKSPACE/gnupg reprepro includedeb $DISTRO \${pkg}
-        scp -o StrictHostKeyChecking=no -i $WORKSPACE/id_rsa \${pkg} ubuntu@gazebosim.org:/var/www/assets/distributions
+        ls -lash \${pkg}
+        test -z \$(find \$pkg -size +3k) && exit 1
         FOUND_PKG=1
         break;
     fi
