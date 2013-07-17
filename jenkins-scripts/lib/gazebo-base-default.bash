@@ -59,6 +59,8 @@ LD_LIBRARY_PATH=/opt/ros/${ROS_DISTRO}/lib make test ARGS="-VV" || true
 
 # Step 3: code check
 cd $WORKSPACE/gazebo
+# Workaround to avoid jenkins to close connection while waiting cppcheck to
+# finish, since no output is generated
 cat > keep_output.sh <<- DELIM3
 while true; do
     echo -n "."
