@@ -10,21 +10,55 @@ cat > build.sh << DELIM
 set -ex
 
 # Step 1: install everything you need
-apt-get install -y ${SDFORMAT_BASE_DEPENDENCIES}
+apt-get install -y ${SDFORMAT_BASE_DEPENDENCIES} git
 
 # Step 2: configure and build
 rm -rf $WORKSPACE/build
 mkdir -p $WORKSPACE/build
 cd $WORKSPACE/build
-cmake $WORKSPACE/sdformat
+cmake $WORKSPACE/sdformat -DCMAKE_INSTALL_PREFIX=/usr/local
 make -j3
 make install
 make test ARGS="-VV" || true
 
-# Step 3: code check
-cd $WORKSPACE/sdformat
-sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
-cat $WORKSPACE/build/cppcheck_results/*.xml
+# Install abi-compliance-checker.git
+cd $WORKSPACE
+rm -fr $WORKSPACE/abi-compliance-checker
+git clone git://github.com/lvc/abi-compliance-checker.git  
+cd abi-compliance-checker
+perl Makefile.pl -install --prefix=/usr
+
+mkdir -p $WORKSPACE/abi_checker
+cd $WORKSPACE/abi_checker
+cat > pkg.xml << CURRENT_DELIM
+ <version>
+     stable_version
+ </version>
+   
+ <headers>
+    /usr/include/sdformat-1.4/
+ </headers>
+   
+ <libs>
+    /usr/lib/
+ </libs>
+CURRENT_DELIM
+
+cat > devel.xml << DEVEL_DELIM
+ <version>
+     development
+ </version>
+   
+ <headers>
+    /usr/local/include/sdformat-1.4//
+ </headers>
+   
+ <libs>
+    /usr/local/lib/
+ </libs>
+DEVEL_DELIM
+
+abi-compliance-checker -lib sdformat -old pkg.xml -new devel.xml
 DELIM
 
 # Make project-specific changes here
