@@ -139,6 +139,8 @@ echo "HOOKDIR=\$PBUILD_DIR" > \$HOME/.pbuilderrc
 
 export DEB_BUILD_OPTIONS=parallel=${MAKE_JOBS}
 
+apt-get install -s debhelper cmake doxygen doxygen-latex libfreeimage-dev libprotoc-dev libprotobuf-dev protobuf-compiler freeglut3-dev libcurl4-openssl-dev libtinyxml-dev libtar-dev libtbb-dev libogre-dev libxml2-dev pkg-config libqt4-dev libltdl-dev libboost-thread1.49-dev libboost-signals1.49-dev libboost-system1.49-dev libboost-filesystem1.49-dev libboost-program-options1.49-dev libboost-regex1.49-dev libboost-iostreams1.49-dev robot-player-dev libcegui-mk2-dev libavformat-dev libavcodec-dev libswscale-dev sdformat 
+
 # Step 6: use pbuilder-dist to create binary package(s)
 pbuilder-dist $DISTRO $ARCH build ../*.dsc -j${MAKE_JOBS}
 
