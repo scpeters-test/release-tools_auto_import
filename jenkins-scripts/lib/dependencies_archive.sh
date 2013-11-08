@@ -49,7 +49,7 @@ GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
                           libboost-program-options-dev     \\
                           libboost-regex-dev               \\
                           libboost-iostreams-dev           \\
-                          libbullet-dev                    \\
+                          libbullet2.82-dev                \\
                           libsimbody-dev                   \\
                           sdformat"
 
@@ -57,7 +57,8 @@ GAZEBO_EXTRA_DEPENDENCIES="robot-player-dev \\
                            libcegui-mk2-dev \\
                            libavformat-dev  \\
                            libavcodec-dev   \\
-                           libswscale-dev"
+                           libswscale-dev   \\
+                           ruby-ronn "
 
 GAZEBO_DEB_PACKAGE=$GAZEBO_DEB_PACKAGE
 if [ -z $GAZEBO_DEB_PACKAGE ]; then
