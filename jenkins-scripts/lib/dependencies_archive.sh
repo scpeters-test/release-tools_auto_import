@@ -95,4 +95,4 @@ DRCSIM_BASE_DEPENDENCIES="ros-${ROS_DISTRO}-pr2-mechanism                     \\
 
 DRCSIM_FULL_DEPENDENCIES="${DRCSIM_BASE_DEPENDENCIES} \\
                           sandia-hand                 \\
-                          osrf-common"
+			  osrf-common"

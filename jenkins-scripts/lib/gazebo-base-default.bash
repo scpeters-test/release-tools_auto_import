@@ -63,11 +63,19 @@ cmake ${GZ_CMAKE_BUILD_TYPE}         \\
 make -j${MAKE_JOBS}
 make install
 . /usr/share/gazebo/setup.sh
-make test ARGS="-VV" || true
+make test ARGS="-VV -R UNIT_*" || true
+make test ARGS="-VV -R INTEGRATION_*" || true
+make test ARGS="-VV -R REGRESSION_*" || true
 
-# Step 3: code check
-cd $WORKSPACE/gazebo
-sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
+# Only run cppcheck on raring
+if [ "$DISTRO" = "raring" ]; then 
+  # Step 3: code check
+  cd $WORKSPACE/gazebo
+  sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
+else
+  mkdir -p $WORKSPACE/build/cppcheck_results/
+  echo "<results></results>" >> $WORKSPACE/build/cppcheck_results/empty.xml 
+fi
 DELIM
 
 # Make project-specific changes here
