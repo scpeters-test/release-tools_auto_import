@@ -95,12 +95,47 @@ DRCSIM_BASE_DEPENDENCIES="ros-${ROS_DISTRO}-pr2-mechanism                     \\
                           ros-${ROS_DISTRO}-robot-model-visualization         \\
                           ros-${ROS_DISTRO}-image-pipeline                    \\
                           ros-${ROS_DISTRO}-image-transport-plugins           \\
-                          ros-${ROS_DISTRO}-gazebo-plugins                    \\
                           ros-${ROS_DISTRO}-compressed-depth-image-transport  \\
                           ros-${ROS_DISTRO}-compressed-image-transport        \\
-                          ros-${ROS_DISTRO}-theora-image-transport            \\
+                          ros-${ROS_DISTRO}-theora-image-transport"
+
+DRCSIM_FULL_DEPENDENCIES="${DRCSIM_BASE_DEPENDENCIES}      \\
+                          sandia-hand                      \\
+			  osrf-common                      \\
+                          ros-${ROS_DISTRO}-gazebo-plugins \\
+                          ros-${ROS_DISTRO}-gazebo-ros     \\
                           ${GAZEBO_DEB_PACKAGE}"
 
-DRCSIM_FULL_DEPENDENCIES="${DRCSIM_BASE_DEPENDENCIES} \\
-                          sandia-hand                 \\
-                          osrf-common"
+# ros-gazebo-pkgs dependencies
+ROS_GAZEBO_PKGS_DEPENDENCIES="libtinyxml-dev                            \\
+                              ros-${ROS_DISTRO}-catkin                  \\
+			      ros-${ROS_DISTRO}-pluginlib               \\
+			      ros-${ROS_DISTRO}-roscpp                  \\
+			      ros-${ROS_DISTRO}-driver-base             \\
+			      ros-${ROS_DISTRO}-angles                  \\
+			      ros-${ROS_DISTRO}-cv-bridge               \\
+			      ros-${ROS_DISTRO}-diagnostic-updater      \\
+			      ros-${ROS_DISTRO}-dynamic-reconfigure     \\
+			      ros-${ROS_DISTRO}-geometry-msgs           \\
+			      ros-${ROS_DISTRO}-image-transport         \\
+			      ros-${ROS_DISTRO}-message-generation      \\
+			      ros-${ROS_DISTRO}-nav-msgs                \\
+			      ros-${ROS_DISTRO}-nodelet                 \\
+			      ros-${ROS_DISTRO}-pcl-conversions         \\
+			      ros-${ROS_DISTRO}-pcl-ros                 \\
+			      ros-${ROS_DISTRO}-polled-camera           \\
+			      ros-${ROS_DISTRO}-rosconsole              \\
+			      ros-${ROS_DISTRO}-rosgraph-msgs           \\
+			      ros-${ROS_DISTRO}-sensor-msgs             \\
+			      ros-${ROS_DISTRO}-std-srvs                \\
+			      ros-${ROS_DISTRO}-tf                      \\
+			      ros-${ROS_DISTRO}-trajectory-msgs         \\
+			      ros-${ROS_DISTRO}-urdf                    \\
+			      ros-${ROS_DISTRO}-cmake-modules"
+
+if [[ $ROS_DISTRO != 'groovy' ]]; then
+ROS_GAZEBO_PKGS_DEPENDENCIES="${ROS_GAZEBO_PKGS_DEPENDENCIES}           \\
+                              ros-${ROS_DISTRO}-controller-manager      \\
+                              ros-${ROS_DISTRO}-joint-limits-interface  \\
+                              ros-${ROS_DISTRO}-transmission-interface"
+fi
