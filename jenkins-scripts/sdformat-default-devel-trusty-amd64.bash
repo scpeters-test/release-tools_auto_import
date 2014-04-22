@@ -4,6 +4,6 @@
 [[ -L ${0} ]] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
-export DISTRO=quantal
+export DISTRO=trusty
 
-. ${SCRIPT_DIR}/lib/gazebo-default-sdformat-default-base.bash
+. ${SCRIPT_DIR}/lib/sdformat-default.bash
