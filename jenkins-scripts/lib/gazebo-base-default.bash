@@ -19,7 +19,7 @@ cat > build.sh << DELIM
 #
 set -ex
 
-# OSRF repository to get bullet. 
+# OSRF repository to get bullet
 apt-get install -y wget
 sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu ${DISTRO} main" > /etc/apt/sources.list.d/drc-latest.list'
 wget http://packages.osrfoundation.org/drc.key -O - | apt-key add -
@@ -41,6 +41,7 @@ if $DART_COMPILE_FROM_SOURCE; then
 fi
 
 # Step 1: install everything you need
+
 # Required stuff for Gazebo
 apt-get update
 apt-get install -y ${BASE_DEPENDENCIES} ${GAZEBO_BASE_DEPENDENCIES} ${GAZEBO_EXTRA_DEPENDENCIES} ${EXTRA_PACKAGES}
@@ -90,7 +91,7 @@ make install
 make test ARGS="-VV -R UNIT_*" || true
 make test ARGS="-VV -R INTEGRATION_*" || true
 make test ARGS="-VV -R REGRESSION_*" || true
-make test ARGS="-VV -R EXAMPLES_*" || true
+make test ARGS="-VV -R EXAMPLE_*" || true
 
 # Only run cppcheck on saucy
 if [ "$DISTRO" = "saucy" ]; then 

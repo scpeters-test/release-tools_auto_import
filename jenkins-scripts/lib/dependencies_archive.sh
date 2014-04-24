@@ -88,6 +88,9 @@ if [ -z $GAZEBO_DEB_PACKAGE ]; then
     GAZEBO_DEB_PACKAGE=gazebo3
 fi
 
+#
+# DRCSIM_BASE_DEPENDENCIES
+#
 # image-transport-plugins is needed to properly advertise compressed image topics
 DRCSIM_BASE_DEPENDENCIES="ros-${ROS_DISTRO}-pr2-mechanism                     \\
                           ros-${ROS_DISTRO}-std-msgs                          \\
@@ -96,7 +99,6 @@ DRCSIM_BASE_DEPENDENCIES="ros-${ROS_DISTRO}-pr2-mechanism                     \\
                           ros-${ROS_DISTRO}-geometry                          \\
                           ros-${ROS_DISTRO}-pr2-controllers                   \\
                           ros-${ROS_DISTRO}-geometry-experimental             \\
-                          ros-${ROS_DISTRO}-robot-model-visualization         \\
                           ros-${ROS_DISTRO}-image-pipeline                    \\
                           ros-${ROS_DISTRO}-image-transport-plugins           \\
                           ros-${ROS_DISTRO}-gazebo3-plugins                   \\
@@ -139,7 +141,9 @@ ROS_GAZEBO_PKGS_DEPENDENCIES="${ROS_GAZEBO_PKGS_DEPENDENCIES}           \\
                               ros-${ROS_DISTRO}-transmission-interface"
 fi
 
+#
 # DART dependencies
+#
 DART_DEPENDENCIES="libflann-dev            \\
                    libgtest-dev            \\
 		   libeigen3-dev           \\
