@@ -3,24 +3,11 @@
 #stop on error
 set -e
 
-# Keep the option of default to not really send a build type and let our own gazebo cmake rules
-# to decide what is the default mode.
-if [ -z ${GZ_BUILD_TYPE} ]; then
-    GZ_CMAKE_BUILD_TYPE=
-else
-    GZ_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${GZ_BUILD_TYPE}"
-fi
-
 # Do not use the subprocess_reaper in debbuild. Seems not as needed as in
 # testing jobs and seems to be slow at the end of jenkins jobs
 export ENABLE_REAPER=false
 
 . ${SCRIPT_DIR}/lib/boilerplate_prepare.sh
-
-# Default to install plain gazebo in gazebo_pkg is not speficied
-if [[ -z $GAZEBO_PKG ]]; then
-    export GAZEBO_PKG=gazebo
-fi
 
 cat > build.sh << DELIM
 ###################################################
@@ -37,20 +24,41 @@ apt-get update
 # Step 1: install everything you need
 
 # Required stuff for Gazebo and install gazebo binary itself
-apt-get install -y ${BASE_DEPENDENCIES} ${GAZEBO_BASE_DEPENDENCIES} ${GAZEBO_EXTRA_DEPENDENCIES} ${EXTRA_PACKAGES} git ${GAZEBO_PKG} exuberant-ctags
+apt-get install -y ${BASE_DEPENDENCIES} ${GAZEBO_BASE_DEPENDENCIES} ${GAZEBO_EXTRA_DEPENDENCIES} ${EXTRA_PACKAGES} mercurial ca-certificates git exuberant-ctags
 
 # Step 2: configure and build
 
+# Copy gazebo to manipulate under root perms
+# 2.1 Origin branch
+cp -a $WORKSPACE/gazebo /tmp/gazebo
+chown -R root:root /tmp/gazebo
+cd /tmp/gazebo
+hg pull
+hg up $GAZEBO_ORIGIN_BRANCH
 # Normal cmake routine for Gazebo
-rm -rf $WORKSPACE/build $WORKSPACE/install
-mkdir -p $WORKSPACE/build $WORKSPACE/install
+rm -rf $WORKSPACE/build
+mkdir -p $WORKSPACE/build
 cd $WORKSPACE/build
-cmake ${GZ_CMAKE_BUILD_TYPE}         \\
-    -DCMAKE_INSTALL_PREFIX=/usr      \\
-    -DENABLE_SCREEN_TESTS:BOOL=False \\
-  $WORKSPACE/gazebo
+cmake -DENABLE_TESTS_COMPILATION:BOOL=False \\
+      -DCMAKE_INSTALL_PREFIX=/usr/local/origin_branch \\
+  /tmp/gazebo
 make -j${MAKE_JOBS}
 make install
+GAZEBO_ORIGIN_DIR=\$(find /usr/local/origin_branch/include -name gazebo-* -type d | sed -e 's:.*/::')
+
+# 2.2 Target branch
+# Reusing the same building and source directory to save bandwith and
+# compilation time.
+cd /tmp/gazebo
+hg up $GAZEBO_TARGET_BRANCH
+# Normal cmake routine for Gazebo
+cd $WORKSPACE/build
+cmake -DENABLE_TESTS_COMPILATION:BOOL=False \\
+      -DCMAKE_INSTALL_PREFIX=/usr/local/target_branch \\
+  /tmp/gazebo
+make -j${MAKE_JOBS}
+make install
+GAZEBO_TARGET_DIR=\$(find /usr/local/target_branch/include -name gazebo-* -type d | sed -e 's:.*/::')
 
 # Install abi-compliance-checker.git
 cd $WORKSPACE
@@ -59,53 +67,45 @@ git clone git://github.com/lvc/abi-compliance-checker.git
 cd abi-compliance-checker
 perl Makefile.pl -install --prefix=/usr
 
-GAZEBO_LIBS=\$(dpkg -L ${GAZEBO_PKG} | grep lib.*.so)
-GAZEBO_LIBS_LOCAL=\$(dpkg -L ${GAZEBO_PKG} | grep lib.*.so | sed -e 's:^/usr:/usr/local:g')
-
-BIN_VERSION=\$(dpkg -l ${GAZEBO_PKG} | tail -n 1 | awk '{ print  \$3 }')
-
-GAZEBO_INC_DIR=\$(find /usr/include -name gazebo-* -type d | sed -e 's:.*/::')
-GAZEBO_LOCAL_INC_DIR=\$(find /usr/local/include -name gazebo-* -type d | sed -e 's:.*/::')
-
 mkdir -p $WORKSPACE/abi_checker
 cd $WORKSPACE/abi_checker
 cat > pkg.xml << CURRENT_DELIM
  <version>
-     .deb pkg version: \$BIN_VERSION
+     branch: $GAZEBO_ORIGIN_BRANCH
  </version>
 
  <headers>
-   /usr/include/\$GAZEBO_INC_DIR/gazebo
+   /usr/local/origin_branch/include/\$GAZEBO_ORIGIN_DIR/gazebo
  </headers>
 
  <skip_headers>
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/GIMPACT
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/opcode
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/test
+   /usr/local/origin_branch/include/\$GAZEBO_ORIGIN_DIR/gazebo/GIMPACT
+   /usr/local/origin_branch/include/\$GAZEBO_ORIGIN_DIR/gazebo/opcode
+   /usr/local/origin_branch/include/\$GAZEBO_ORIGIN_DIR/gazebo/test
  </skip_headers>
 
  <libs>
-  \$GAZEBO_LIBS
+   /usr/local/origin_branch/lib/
  </libs>
 CURRENT_DELIM
 
 cat > devel.xml << DEVEL_DELIM
  <version>
-     branch: $BRANCH
+     branch: $GAZEBO_TARGET_BRANCH
  </version>
  
-  <headers>
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo
+ <headers>
+   /usr/local/target_branch/include/\$GAZEBO_TARGET_DIR/gazebo
  </headers>
- 
+
  <skip_headers>
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/GIMPACT
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/opcode
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/test
+   /usr/local/target_branch/include/\$GAZEBO_TARGET_DIR/gazebo/GIMPACT
+   /usr/local/target_branch/include/\$GAZEBO_TARGET_DIR/gazebo/opcode
+   /usr/local/target_branch/include/\$GAZEBO_TARGET_DIR/gazebo/test
  </skip_headers>
- 
+
  <libs>
-  \$GAZEBO_LIBS_LOCAL
+   /usr/local/target_branch/lib/
  </libs>
 DEVEL_DELIM
 
