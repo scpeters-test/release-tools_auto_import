@@ -11,6 +11,9 @@ else
     GZ_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${GZ_BUILD_TYPE}"
 fi
 
+# No explicit activation means no coverage
+[ -z ${COVERAGE_ENABLED} ] && COVERAGE_ENABLED=false
+
 . ${SCRIPT_DIR}/lib/boilerplate_prepare.sh
 
 # Default to install plain gazebo in gazebo_pkg is not speficied
@@ -55,9 +58,21 @@ fi
 
 # Step 1: install everything you need
 
-# Required stuff for Gazebo and install gazebo binary itself
+# Required stuff for Gazebo
 apt-get update
 apt-get install -y ${BASE_DEPENDENCIES} ${GAZEBO_BASE_DEPENDENCIES} ${GAZEBO_EXTRA_DEPENDENCIES} ${EXTRA_PACKAGES}
+
+# Optional stuff. Check for graphic card support
+if ${GRAPHIC_CARD_FOUND}; then
+    apt-get install -y ${GRAPHIC_CARD_PKG}
+    # Check to be sure version of kernel graphic card support is the same.
+    # It will kill DRI otherwise
+    CHROOT_GRAPHIC_CARD_PKG_VERSION=\$(dpkg -l | grep "^ii.*${GRAPHIC_CARD_PKG}\ " | awk '{ print \$3 }' | sed 's:-.*::')
+    if [ "\${CHROOT_GRAPHIC_CARD_PKG_VERSION}" != "${GRAPHIC_CARD_PKG_VERSION}" ]; then
+       echo "Package ${GRAPHIC_CARD_PKG} has different version in chroot and host system. Maybe you need to update your host" 
+       exit 1
+    fi
+fi
 
 # Step 2: configure and build
 # Check for DART
@@ -92,71 +107,27 @@ cmake ${GZ_CMAKE_BUILD_TYPE}         \\
   $WORKSPACE/gazebo
 make -j${MAKE_JOBS}
 make install
+. /usr/share/gazebo/setup.sh
+make test ARGS="-VV -R UNIT_*" || true
+make test ARGS="-VV -R INTEGRATION_*" || true
+make test ARGS="-VV -R REGRESSION_*" || true
+make test ARGS="-VV -R EXAMPLE_*" || true
 
-# Install abi-compliance-checker.git
-cd $WORKSPACE
-rm -fr $WORKSPACE/abi-compliance-checker
-git clone git://github.com/lvc/abi-compliance-checker.git  
-cd abi-compliance-checker
-perl Makefile.pl -install --prefix=/usr
+# Only run cppcheck on saucy
+if [ "$DISTRO" = "saucy" ]; then 
+  # Step 3: code check
+  cd $WORKSPACE/gazebo
+  sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
+else
+  mkdir -p $WORKSPACE/build/cppcheck_results/
+  echo "<results></results>" >> $WORKSPACE/build/cppcheck_results/empty.xml 
+fi
 
-# Search all packages installed called *gazebo* and list of *.so.* files in these packages
-GAZEBO_LIBS=\$(dpkg -L \$(dpkg -l | grep ^ii | grep gazebo | awk '{ print \$2 }' | tr '\\n' ' ') | grep 'lib.*.so.*')
-GAZEBO_LIBS_LOCAL=\$(echo \${GAZEBO_LIBS} | tr ' ' '\\n' | sed -e 's:^/usr:/usr/local:g')
-BIN_VERSION=\$(dpkg -l ${GAZEBO_PKG} | tail -n 1 | awk '{ print  \$3 }')
-
-GAZEBO_INC_DIR=\$(find /usr/include -name gazebo-* -type d | sed -e 's:.*/::')
-GAZEBO_LOCAL_INC_DIR=\$(find /usr/local/include -name gazebo-* -type d | sed -e 's:.*/::')
-
-mkdir -p $WORKSPACE/abi_checker
-cd $WORKSPACE/abi_checker
-cat > pkg.xml << CURRENT_DELIM
- <version>
-     .deb pkg version: \$BIN_VERSION
- </version>
-
- <headers>
-   /usr/include/\$GAZEBO_INC_DIR/gazebo
- </headers>
-
- <skip_headers>
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/GIMPACT
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/opcode
-   /usr/include/\$GAZEBO_INC_DIR/gazebo/test
- </skip_headers>
-
- <libs>
-  \$GAZEBO_LIBS
- </libs>
-CURRENT_DELIM
-
-cat > devel.xml << DEVEL_DELIM
- <version>
-     branch: $BRANCH
- </version>
- 
-  <headers>
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo
- </headers>
- 
- <skip_headers>
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/GIMPACT
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/opcode
-   /usr/local/include/\$GAZEBO_LOCAL_INC_DIR/gazebo/test
- </skip_headers>
- 
- <libs>
-  \$GAZEBO_LIBS_LOCAL
- </libs>
-DEVEL_DELIM
-
-# clean previous reports
-rm -fr $WORKSPACE/compat_report.html
-rm -fr compat_reports/
-# run report tool
-abi-compliance-checker -lib gazebo -old pkg.xml -new devel.xml || true
-# copy method version independant ( cp ... /*/ ... was not working)
-find compat_reports/ -name compat_report.html -exec cp {} $WORKSPACE/ \;
+# Step 4: copy test log
+# Broken http://build.osrfoundation.org/job/gazebo-any-devel-precise-amd64-gpu-nvidia/6/console
+# Need fix
+# mkdir $WORKSPACE/logs
+# cp $HOME/.gazebo/logs/*.log $WORKSPACE/logs/
 DELIM
 
 # Make project-specific changes here
