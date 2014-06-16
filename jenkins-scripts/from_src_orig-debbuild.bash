@@ -4,10 +4,7 @@
 [[ -L ${0} ]] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
-if [[ -z ${DISTRO} ]]; then
-  export DISTRO=trusty
-fi
+export ENABLE_ROS=false
+export UPLOAD_SOURCEDEB=true
 
-export REPO_TO_USE=ROS
-
-. ${SCRIPT_DIR}/lib/sdformat-any-base.bash
+. ${SCRIPT_DIR}/lib/debbuild-from-origsource.bash 

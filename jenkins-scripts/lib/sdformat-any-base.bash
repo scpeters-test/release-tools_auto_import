@@ -38,14 +38,17 @@ apt-get install -y wget
 sh -c 'echo "deb ${REPO_URL} ${DISTRO} main" > /etc/apt/sources.list.d/drc-latest.list'
 wget ${REPO_KEY} -O - | apt-key add -
 apt-get update
-apt-get install -y ${BASE_DEPENDENCIES} ${SDFORMAT_BASE_DEPENDENCIES} sdformat git exuberant-ctags 
+
+# Checkout latest libsdformatX-dev package
+SDFORMAT_PKG=\$(apt-cache search sdformat | grep 'libsdformat*-dev\ ' | awk '{ print \$1 }')
+apt-get install -y ${BASE_DEPENDENCIES} ${SDFORMAT_BASE_DEPENDENCIES} \${SDFORMAT_PKG} git exuberant-ctags 
 
 # Step 2: configure and build
 rm -rf $WORKSPACE/build
 mkdir -p $WORKSPACE/build
 cd $WORKSPACE/build
 cmake $WORKSPACE/sdformat -DCMAKE_INSTALL_PREFIX=/usr/local
-make -j3
+make -j${MAKE_JOBS}
 make install
 sdformat_ORIGIN_DIR=\$(find /usr/include -name sdformat-* -type d | sed -e 's:.*/::')
 sdformat_TARGET_DIR=\$(find /usr/local/include -name sdformat-* -type d | sed -e 's:.*/::')
@@ -57,7 +60,7 @@ git clone git://github.com/lvc/abi-compliance-checker.git
 cd abi-compliance-checker
 perl Makefile.pl -install --prefix=/usr
 
-BIN_VERSION=\$(dpkg -l sdformat | tail -n 1 | awk '{ print  \$3 }')
+BIN_VERSION=\$(dpkg -l \${SDFORMAT_PKG} | tail -n 1 | awk '{ print  \$3 }')
 
 mkdir -p $WORKSPACE/abi_checker
 cd $WORKSPACE/abi_checker
@@ -67,7 +70,7 @@ cat > pkg.xml << CURRENT_DELIM
  </version>
    
  <headers>
-    /usr/local/include/\$sdformat_ORIGIN_DIR/sdf
+    /usr/include/\$sdformat_ORIGIN_DIR/
  </headers>
    
  <libs>
@@ -81,7 +84,7 @@ cat > devel.xml << DEVEL_DELIM
  </version>
    
  <headers>
-    /usr/local/include/\$sdformat_TARGET_DIR/sdf
+    /usr/local/include/\$sdformat_TARGET_DIR
  </headers>
    
  <libs>
