@@ -22,5 +22,6 @@ echo "cmake .. %VS_CMAKE_GEN% %VS_DEFAULT_CMAKE_FLAGS% %ARG_CMAKE_FLAGS%"
 cmake .. %VS_CMAKE_GEN% %VS_DEFAULT_CMAKE_FLAGS% %ARG_CMAKE_FLAGS%
 
 msbuild %VS_DEFAULT_MSBUILD_FLAGS% ALL_BUILD.vcxproj
+
 REM Need to find a way of running test from msbuild passing ARGS=-VV
-ctest -C "Release" --extra-verbose || true
+ctest -C "Release" --verbose --extra-verbose || true
