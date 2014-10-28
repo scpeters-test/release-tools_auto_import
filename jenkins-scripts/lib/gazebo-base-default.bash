@@ -19,10 +19,17 @@ cat > build.sh << DELIM
 #
 set -ex
 
-# OSRF repository to get bullet
-apt-get install -y wget
-sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu ${DISTRO} main" > /etc/apt/sources.list.d/drc-latest.list'
-wget http://packages.osrfoundation.org/drc.key -O - | apt-key add -
+echo \$DISPLAY
+glxinfo || true
+
+ls -las /tmp/.X11-unix
+
+export DISPLAY=$DISPLAY
+glxinfo
+
+
+# Step 1: Configure apt
+# The image already has all the needed source.lists entries
 
 # Dart repositories
 if $DART_FROM_PKGS; then
@@ -41,6 +48,9 @@ if $DART_COMPILE_FROM_SOURCE; then
 fi
 
 # Step 1: install everything you need
+
+# TODO: fix databases. Need to look the reason
+/usr/share/debconf/fix_db.pl
 
 # Required stuff for Gazebo
 apt-get update
@@ -128,11 +138,41 @@ cp -a $WORKSPACE/cppcheck_results $WORKSPACE/build/cppcheck_results
 cp -a $WORKSPACE/test_results $WORKSPACE/build/test_results
 DELIM
 
-# Make project-specific changes here
-###################################################
+cat > Dockerfile << DELIM_DOCKER
+#######################################################
+# Docker file to run build.sh
 
-sudo pbuilder  --execute \
-    --bindmounts $WORKSPACE \
-    --basetgz $basetgz \
-    -- build.sh
+FROM jrivero/gazebo
+MAINTAINER Jose Luis Rivero <jrivero@osrfoundation.org>
 
+# If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
+# By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
+RUN route -n | awk '/^0.0.0.0/ {print \$2}' > /tmp/host_ip.txt
+RUN echo "HEAD /" | nc \$(cat /tmp/host_ip.txt) 8000 | grep squid-deb-proxy \
+  && (echo "Acquire::http::Proxy \"http://\$(cat /tmp/host_ip.txt):8000\";" > /etc/apt/apt.conf.d/30proxy) \
+  && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
+  || echo "No squid-deb-proxy detected on docker host"
+
+
+# Map the workspace into the container
+RUN mkdir -p ${WORKSPACE}
+ADD gazebo ${WORKSPACE}/gazebo
+ADD build.sh build.sh
+RUN chmod +x build.sh
+RUN ./build.sh
+DELIM_DOCKER
+
+sudo docker pull jrivero/gazebo
+sudo docker build -t gazebo/dev .
+
+echo "DISPLAY=unix$DISPLAY"
+# --priviledged is essential to make DRI work
+sudo docker run --privileged \
+                       -e "DISPLAY=unix$DISPLAY" \
+                       -v="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+		       -t gazebo/dev \
+                        /bin/bash
+
+sudo docker cp ${CID}:${WORKSPACE}/build/test_results     ${WORKSPACE}/build
+sudo docker cp ${CID}:${WORKSPACE}/build/cppcheck_results ${WORKSPACE}/build
+sudo docker stop ${CID}
