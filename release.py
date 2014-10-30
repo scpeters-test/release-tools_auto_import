@@ -135,9 +135,18 @@ def sanity_package_name(repo_dir, package, package_alias):
             continue
         # Check that first word is the package alias or name
         if line.partition(' ')[0] != expected_name:
-            error("Error in package name or alias: " + line)
+            error("Error in changelog package name or alias: " + line)
 
-    print_success("Package names in changelog")
+    cmd = ["find", repo_dir, "-name", "control","-exec","grep","-H","Source:","{}",";"]
+    out, err = check_call(cmd)
+    for line in out.split("\n"):
+        if not line:
+            continue
+        # Check that first word is the package alias or name
+        if line.partition(' ')[2] != expected_name:
+            error("Error in source package. File:  " + line.partition(' ')[1] + ". Got " + line.partition(' ')[2] + " expected " + expected_name)
+
+    print_success("Package names in changelog and control")
 
 def sanity_package_version(repo_dir, version, release_version):
     cmd = ["find", repo_dir, "-name", "changelog","-exec","head","-n","1","{}",";"]
@@ -289,14 +298,6 @@ def generate_upload_tarball(args):
     # TODO: Consider auto-updating the Ubuntu changelog.  It requires
     # cloning the <package>-release repo, making a change, and pushing it back.
     # Until we do that, the user must have first updated it manually.
-    if not args.nightly:
-        print('\n\nReady to kick off the Ubuntu deb-builder.  Did you already update ubuntu/debian/changelog in the %s-release repo (on the %s branch)?  [y/N]'%(args.package, args. release_repo_branch))
-        answer = sys.stdin.readline().strip()
-        if answer != 'Y' and answer != 'y':
-            print('Ubuntu deb-builds were NOT started.')
-            print('Please update the changelog and try again.')
-            sys.exit(1)
-
     return source_tarball_uri
 
 
