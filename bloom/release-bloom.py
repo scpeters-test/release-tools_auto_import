@@ -17,7 +17,7 @@ DOWNLOAD_URI = 'http://old.gazebosim.org/assets/distributions/'
 
 UBUNTU_ARCHS = ['amd64']
 # UBUNTU_DISTROS = ['trusty', 'precise']
-UBUNTU_DISTROS = ['precise']
+UBUNTU_DISTROS = ['trusty']
 ROS_DISTROS_IN_PRECISE = [ 'hydro' ]
 ROS_DISTROS_IN_TRUSTY = [ 'indigo' ]
 
