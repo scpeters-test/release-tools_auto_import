@@ -15,7 +15,7 @@ JOB_NAME_PATTERN = '%s-bloom-debbuilder'
 
 UBUNTU_ARCHS = ['amd64']
 # UBUNTU_DISTROS = ['trusty', 'precise']
-UBUNTU_DISTROS = ['precise']
+UBUNTU_DISTROS = ['trusty']
 ROS_DISTROS_IN_PRECISE = [ 'hydro' ]
 ROS_DISTROS_IN_TRUSTY = [ 'indigo' ]
 

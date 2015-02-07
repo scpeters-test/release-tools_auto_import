@@ -11,6 +11,17 @@ else
     GZ_CMAKE_BUILD_TYPE="-DCMAKE_BUILD_TYPE=${GZ_BUILD_TYPE}"
 fi
 
+# Identify GAZEBO_MAJOR_VERSION to help with dependency resolution
+GAZEBO_MAJOR_VERSION=`\
+  grep 'set.*GAZEBO_MAJOR_VERSION ' ${WORKSPACE}/gazebo/CMakeLists.txt | \
+  tr -d 'a-zA-Z _()'`
+
+# Check gazebo version between 1-9 
+if ! [[ ${GAZEBO_MAJOR_VERSION} =~ ^-?[1-9]$ ]]; then
+   echo "Error! GAZEBO_MAJOR_VERSION is not between 1 and 9, check the detection"
+   exit -1
+fi
+
 . ${SCRIPT_DIR}/lib/boilerplate_prepare.sh
 
 cat > build.sh << DELIM
@@ -88,6 +99,12 @@ cmake ${GZ_CMAKE_BUILD_TYPE}         \\
 make -j${MAKE_JOBS}
 make install
 . /usr/share/gazebo/setup.sh
+
+# Need to clean up from previous built
+rm -fr $WORKSPACE/cppcheck_results
+rm -fr $WORKSPACE/test_results
+
+# Run tests
 make test ARGS="-VV -R UNIT_*" || true
 make test ARGS="-VV -R INTEGRATION_*" || true
 make test ARGS="-VV -R REGRESSION_*" || true
@@ -108,6 +125,18 @@ fi
 # Need fix
 # mkdir $WORKSPACE/logs
 # cp $HOME/.gazebo/logs/*.log $WORKSPACE/logs/
+
+# Step 5. Need to clean build/ directory so disk space is under control
+# Move cppcheck and test results out of build
+# Copy the results
+mv $WORKSPACE/build/cppcheck_results $WORKSPACE/cppcheck_results
+mv $WORKSPACE/build/test_results $WORKSPACE/test_results
+rm -fr $WORKSPACE/build
+mkdir -p $WORKSPACE/build
+# To keep backwards compatibility with current configurations keep a copy
+# of tests_results in the build path.
+cp -a $WORKSPACE/cppcheck_results $WORKSPACE/build/cppcheck_results
+cp -a $WORKSPACE/test_results $WORKSPACE/build/test_results
 DELIM
 
 # Make project-specific changes here
