@@ -4,9 +4,7 @@
 [[ -L ${0} ]] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
-export DISTRO=precise
-export ROS_DISTRO=hydro
-
-export GZ_BUILD_TYPE=Debug
+export DISTRO=utopic
+export DART_USE_4_VERSION=true
 
 . ${SCRIPT_DIR}/lib/gazebo-base-default.bash

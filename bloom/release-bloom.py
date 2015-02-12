@@ -12,8 +12,6 @@ import shutil
 USAGE = 'release.py <package> <version> <upstream_release_repo> <jenkinstoken>'
 JENKINS_URL = 'http://build.osrfoundation.org'
 JOB_NAME_PATTERN = '%s-bloom-debbuilder'
-UPLOAD_DEST = 'ubuntu@old.gazebosim.org:/var/www/assets/distributions'
-DOWNLOAD_URI = 'http://old.gazebosim.org/assets/distributions/'
 
 UBUNTU_ARCHS = ['amd64']
 # UBUNTU_DISTROS = ['trusty', 'precise']
@@ -33,9 +31,6 @@ def parse_args(argv):
     parser.add_argument('jenkins_token', help='secret token to allow access to Jenkins to start builds')
     parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False,
                         help='dry-run; i.e., do actually run any of the commands')
-    parser.add_argument('-r', '--release-version', dest='release_version', 
-                        default=None,
-                        help='Release version suffix; usually 1 (e.g., 1')
     parser.add_argument('-r', '--release-version', dest='release_version', 
                         default=None,
                         help='Release version suffix; usually 1 (e.g., 1')

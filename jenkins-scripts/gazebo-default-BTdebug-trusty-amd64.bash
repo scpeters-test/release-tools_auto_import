@@ -4,7 +4,9 @@
 [[ -L ${0} ]] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
 SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
-export DISTRO=quantal
-export ROS_DISTRO=groovy
+export DISTRO=trusty
+export ROS_DISTRO=indigo
 
-. ${SCRIPT_DIR}/lib/ftcsim-default.bash
+export GZ_BUILD_TYPE=Debug
+
+. ${SCRIPT_DIR}/lib/gazebo-base-default.bash

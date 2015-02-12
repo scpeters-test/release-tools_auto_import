@@ -6,6 +6,9 @@ SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
 export GPU_SUPPORT_NEEDED=true
 
-export DISTRO=raring
+export DISTRO=trusty
+export ROS_DISTRO=indigo
+
+export GZ_BUILD_TYPE=Release
 
 . ${SCRIPT_DIR}/lib/gazebo-base-default.bash
