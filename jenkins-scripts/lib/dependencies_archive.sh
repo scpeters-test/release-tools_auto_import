@@ -3,6 +3,8 @@
 # **** WARNING ***** : when modifying this file
 # **** WARNING ***** : any trailing whitespaces will break dependencies scapes
 
+# TODO: find a good way of auto update this value
+export GAZEBO_CURRENT_VERSION=5
 
 if [[ -z $ROS_DISTRO ]]; then
     echo "ROS_DISTRO was not set before using dependencies_archive.sh!"
@@ -129,15 +131,17 @@ if [[ ${DISTRO} != 'precise' ]]; then
                                libgdal-dev"
 fi
 
-GAZEBO_DEB_PACKAGE=$GAZEBO_DEB_PACKAGE
+if [ -z $GAZEBO_VERSION ]; then
+    # Default version if not found
+    GAZEBO_VERSION=${GAZEBO_CURRENT_VERSION}
 
-if [ -z $GAZEBO_DEB_PACKAGE ]; then
-    GAZEBO_DEB_PACKAGE=libgazebo5-dev
     # Gazebo5 is not supported in precise, use gazebo4 instead
     if [[ ${DISTRO} == 'precise' ]]; then
-      GAZEBO_DEB_PACKAGE=libgazebo4-dev
+      GAZEBO_VERSION=4
     fi
 fi
+
+export GAZEBO_DEB_PACKAGE=libgazebo${GAZEBO_VERSION}-dev
 
 #
 # DRCSIM_DEPENDENCIES
@@ -150,7 +154,7 @@ DRCSIM_BASE_DEPENDENCIES="ros-${ROS_DISTRO}-std-msgs                          \\
                           ros-${ROS_DISTRO}-geometry-experimental             \\
                           ros-${ROS_DISTRO}-image-pipeline                    \\
                           ros-${ROS_DISTRO}-image-transport-plugins           \\
-                          ros-${ROS_DISTRO}-gazebo4-plugins                   \\
+                          ros-${ROS_DISTRO}-gazebo${GAZEBO_VERSION}-plugins   \\
                           ros-${ROS_DISTRO}-compressed-depth-image-transport  \\
                           ros-${ROS_DISTRO}-compressed-image-transport        \\
                           ros-${ROS_DISTRO}-theora-image-transport            \\
@@ -178,12 +182,12 @@ else
    ROS_POSTFIX=""
 fi
 
-DRCSIM_FULL_DEPENDENCIES="${DRCSIM_BASE_DEPENDENCIES}       \\
-                          sandia-hand${ROS_POSTFIX}         \\
-    	                  osrf-common${ROS_POSTFIX}         \\
-                          ros-${ROS_DISTRO}-laser-assembler \\
-                          ros-${ROS_DISTRO}-gazebo4-plugins \\
-                          ros-${ROS_DISTRO}-gazebo4-ros     \\
+DRCSIM_FULL_DEPENDENCIES="${DRCSIM_BASE_DEPENDENCIES}                 \\
+                          sandia-hand${ROS_POSTFIX}                   \\
+    	                  osrf-common${ROS_POSTFIX}                   \\
+                          ros-${ROS_DISTRO}-laser-assembler           \\
+                          ros-${ROS_DISTRO}-${GAZEBO_VERSION}-plugins \\
+                          ros-${ROS_DISTRO}-${GAZEBO_VERSION}-ros     \\
                           ${GAZEBO_DEB_PACKAGE}"
 #
 # SANDIA_HAND DEPENDECIES

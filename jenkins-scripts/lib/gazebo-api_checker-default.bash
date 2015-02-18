@@ -13,18 +13,14 @@ fi
 
 . ${SCRIPT_DIR}/lib/boilerplate_prepare.sh
 
-# Default to install plain gazebo in gazebo_pkg is not speficied
-if [[ -z $GAZEBO_PKG ]]; then
-    export GAZEBO_PKG=gazebo3
-fi
-
-# Split package in gazebo3 needs -dev to explore the headers
-if [[ $GAZEBO_PKG == 'gazebo3' ]]; then
-    GAZEBO_PKG=libgazebo-dev
+# Safety check: be sure that GAZEBO_DEB_PACKAGE was set by dependencies_archive.sh
+if [[ -z $GAZEBO_DEB_PACKAGE  ]]; then
+    echo "GAZEBO_DEB_PACKAGE is not set. Check the scripts"
+    exit 1
 fi
 
 # Install gazebo from package and git to retrieve api checker
-export EXTRA_PACKAGES="${GAZEBO_PKG} git exuberant-ctags"
+export EXTRA_PACKAGES="${GAZEBO_DEB_PACKAGE} git exuberant-ctags"
 
 cat > build.sh << DELIM
 ###################################################
@@ -103,7 +99,7 @@ perl Makefile.pl -install --prefix=/usr
 # Search all packages installed called *gazebo* and list of *.so.* files in these packages
 GAZEBO_LIBS=\$(dpkg -L \$(dpkg -l | grep ^ii | grep gazebo | awk '{ print \$2 }' | tr '\\n' ' ') | grep 'lib.*.so.*')
 GAZEBO_LIBS_LOCAL=\$(echo \${GAZEBO_LIBS} | tr ' ' '\\n' | sed -e 's:^/usr:/usr/local:g')
-BIN_VERSION=\$(dpkg -l ${GAZEBO_PKG} | tail -n 1 | awk '{ print  \$3 }')
+BIN_VERSION=\$(dpkg -l ${GAZEBO_DEB_PACKAGE} | tail -n 1 | awk '{ print  \$3 }')
 
 GAZEBO_INC_DIR=\$(find /usr/include -name gazebo-* -type d | sed -e 's:.*/::')
 GAZEBO_LOCAL_INC_DIR=\$(find /usr/local/include -name gazebo-* -type d | sed -e 's:.*/::')
