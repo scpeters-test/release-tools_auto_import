@@ -10,6 +10,8 @@ if [[ -z $ROS_DISTRO ]]; then
 fi
 
 # Dart flags. Enable it by default unless compiled from source
+DART_FROM_PKGS=true
+
 if [ -z ${DART_COMPILE_FROM_SOURCE} ]; then
    DART_COMPILE_FROM_SOURCE=false
 fi
