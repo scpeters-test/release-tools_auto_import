@@ -91,6 +91,8 @@ export DYLD_LIBRARY_PATH="${RUN_DIR}/lib:${DYLD_LIBRARY_PATH}:$(HOME)/lib:/usr/l
 export BOOST_ROOT=${RUN_DIR}
 export PATH="${PATH}:${RUN_DIR}/bin"
 export CMAKE_PREFIX_PATH=${RUN_DIR}
+otool -L $WORKSPACE/build/test/integration/INTEGRATION_aero_plugin
+otool -L ${RUN_DIR}/lib/libfreetype.dylib
 
 # Need to clean up models before run tests (issue 27)
 make test ARGS="-VV -R INTEGRATION_" || true
