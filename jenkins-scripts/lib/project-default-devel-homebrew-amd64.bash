@@ -61,6 +61,7 @@ export DYLD_FALLBACK_LIBRARY_PATH="${RUN_DIR}/lib:$(HOME)/lib:/usr/local/lib:/li
 export PATH="${PATH}:/opt/X11/bin:${RUN_DIR}/bin"
 export C_INCLUDE_PATH="${C_INCLUDE_PATH}:${RUN_DIR}/include"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${RUN_DIR}/include"
+export LIBRARY_PATH="${LIBRARY_PATH}:${RUN_DIR}/lib"
 
 # set display before cmake
 # open XQuartz manually to ensure a running X server
@@ -78,6 +79,8 @@ ${RUN_DIR}/bin/cmake ${WORKSPACE}/${PROJECT} \
 
 make -j${MAKE_JOBS} install
 ${RUN_DIR}/bin/brew link ${PROJECT}
+otool -L $WORKSPACE/build/test/integration/INTEGRATION_aero_plugin
+otool -L ${RUN_DIR}/lib/libfreetype.dylib
 
 sudo rm -fr \$HOME/.gazebo/models
 
