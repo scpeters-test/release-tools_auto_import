@@ -84,13 +84,13 @@ sudo rm -fr \$HOME/.gazebo/models
 cat > test_run.sh << DELIM
 cd $WORKSPACE/build/
 export PKG_CONFIG_PATH=${RUN_DIR}/lib/pkgconfig
-export DYLD_FALLBACK_LIBRARY_PATH="${RUN_DIR}/lib:$(HOME)/lib:/usr/local/lib:/lib:/usr/lib"
+export DYLD_LIBRARY_PATH="${RUN_DIR}/lib:${DYLD_LIBRARY_PATH}:$(HOME)/lib:/usr/local/lib:/lib:/usr/lib"
 export BOOST_ROOT=${RUN_DIR}
 export PATH="${PATH}:${RUN_DIR}/bin"
 export CMAKE_PREFIX_PATH=${RUN_DIR}
 
 # Need to clean up models before run tests (issue 27)
-make test ARGS="-VV" || true
+make test ARGS="-VV -R INTEGRATION_" || true
 DELIM
 
 chmod +x test_run.sh
