@@ -132,7 +132,7 @@ if $ENABLE_ROS; then
 fi
 
 if $ENABLE_OSRF; then
-  osrf_repository_str="--repo http://packages.osrfoundation.org/drc/ubuntu"
+  osrf_repository_str="--repo osrf@http://packages.osrfoundation.org/drc/ubuntu"
 fi
 
 sudo ./setup_apt_root.py $distro $arch $rootdir \
