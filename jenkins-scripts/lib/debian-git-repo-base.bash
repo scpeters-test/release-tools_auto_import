@@ -4,6 +4,9 @@
 # testing jobs and seems to be slow at the end of jenkins jobs
 export ENABLE_REAPER=false
 
+# Needed for the osrf repo
+export ENABLE_OSRF=true
+
 . ${SCRIPT_DIR}/lib/boilerplate_prepare.sh
 
 # If no value for MULTIARCH_SUPPORT was submitted and

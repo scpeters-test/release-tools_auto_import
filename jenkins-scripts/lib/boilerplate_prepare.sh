@@ -131,8 +131,12 @@ if $ENABLE_ROS; then
   ros_repository_str="--repo ros@http://packages.ros.org/ros/ubuntu"
 fi
 
+if $ENABLE_OSRF; then
+  osrf_repository_str="--repo http://packages.osrfoundation.org/drc/ubuntu"
+fi
+
 sudo ./setup_apt_root.py $distro $arch $rootdir \
-                          --mirror $ubuntu_repo_url $ros_repository_str \
+                          --mirror $ubuntu_repo_url $ros_repository_str $osrf_repository_str \
 			  --local-conf-dir $WORKSPACE 
 sudo rm -rf $output_dir
 mkdir -p $output_dir
