@@ -65,6 +65,17 @@ else
     sdformat_pkg="libsdformat2-dev"
 fi
 
+# SDFORMAT related dependencies
+if [[ -z ${SDFORMAT_MAJOR_VERSION} ]]; then
+    SDFORMAT_MAJOR_VERSION=3
+fi
+
+if [[ ${SDFORMAT_MAJOR_VERSION} -ge 3 ]]; then
+    # sdformat3 requires ignition-math2
+    SDFORMAT_BASE_DEPENDENCIES="${SDFORMAT_BASE_DEPENDENCIES}          \\
+                                libignition-math2-dev"
+fi
+
 # GAZEBO related dependencies
 if [[ -z ${GAZEBO_MAJOR_VERSION} ]]; then
     GAZEBO_MAJOR_VERSION=5
@@ -118,7 +129,7 @@ GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
                           libboost-program-options-dev     \\
                           libboost-regex-dev               \\
                           libboost-iostreams-dev           \\
-                          libignition-math-dev             \\
+                          libignition-math2-dev            \\
                           ${bullet_pkg}                    \\
                           libsimbody-dev                   \\
                           ${dart_pkg}                      \\
@@ -128,6 +139,7 @@ GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
 GAZEBO_EXTRA_DEPENDENCIES="robot-player-dev \\
                            libavformat-dev  \\
                            libavcodec-dev   \\
+                           libgraphviz-dev  \\
                            libswscale-dev   \\
                            ruby-ronn"
 		       
@@ -231,14 +243,15 @@ ROS_GAZEBO_PKGS_DEPENDENCIES="libtinyxml-dev                            \\
 			      ros-${ROS_DISTRO}-trajectory-msgs         \\
 			      ros-${ROS_DISTRO}-urdf                    \\
 			      ros-${ROS_DISTRO}-xacro                   \\
-			      ros-${ROS_DISTRO}-cmake-modules"
-
-if [[ $ROS_DISTRO != 'groovy' ]]; then
-ROS_GAZEBO_PKGS_DEPENDENCIES="${ROS_GAZEBO_PKGS_DEPENDENCIES}           \\
+			      ros-${ROS_DISTRO}-cmake-modules           \\
                               ros-${ROS_DISTRO}-controller-manager      \\
                               ros-${ROS_DISTRO}-joint-limits-interface  \\
                               ros-${ROS_DISTRO}-transmission-interface"
-fi
+
+# These dependencies are for testing the ros_gazebo_pkgs			      
+ROS_GAZEBO_PKGS_EXAMPLE_DEPS="ros-${ROS_DISTRO}-xacro                   \\
+                              ros-${ROS_DISTRO}-effort-controllers      \\
+                              ros-${ROS_DISTRO}-joint-state-controller"
 
 #
 # DART dependencies
