@@ -69,9 +69,9 @@ fi
 if ${USE_OSRF_REPO}; then
 cat >> Dockerfile << DELIM_DOCKER2
 RUN apt-get update && apt-get install -y wget
-RUN echo "deb http://packages.osrfoundation.org/drc/ubuntu ${DISTRO} main" > \\
-                                                           /etc/apt/sources.list.d/drc-latest.list && \\
-    wget http://packages.osrfoundation.org/drc.key -O - | apt-key add - 
+RUN echo "deb http://packages.osrfoundation.org/gazebo/ubuntu ${DISTRO} main" > \\
+                                                /etc/apt/sources.list.d/osrf.list && \\
+    wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - 
 DELIM_DOCKER2
 fi
 
@@ -84,6 +84,17 @@ RUN apt-add-repository -y ppa:libccd-debs
 RUN apt-add-repository -y ppa:fcl-debs
 RUN apt-add-repository -y ppa:dartsim
 DELIM_DOCKER_DART_PKGS
+fi
+
+# Handle special INVALIDATE_DOCKER_CACHE keyword by set a random
+# string in the moth year str
+if [[ -n ${INVALIDATE_DOCKER_CACHE} ]]; then
+  echo 'BEGIN SECTION: invalidate full docker cache'
+  echo "Detecting content in INVALIDATE_DOCKER_CACHE. Invalidating it"
+cat >> Dockerfile << DELIM_DOCKER_INVALIDATE
+RUN echo "Invalidate cache enabled. ${DOCKER_RND_ID}"
+DELIM_DOCKER_INVALIDATE
+  echo 'END SECTION'
 fi
 
 cat >> Dockerfile << DELIM_DOCKER3
