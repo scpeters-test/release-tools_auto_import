@@ -38,6 +38,12 @@ if $NEED_C11_COMPILER; then
   fi
 fi
 
+# Transition for 4.8 -> 4.9 makes some optimization in the linking
+# which can break some software. Use it as a workaround in this case
+if [ -z ${NEED_GCC48_COMPILER} ]; then
+  NEED_GCC48_COMPILER=false
+fi
+
 # Useful for running tests properly in ros based software
 if ${ENABLE_ROS}; then
   export ROS_HOSTNAME=localhost
@@ -82,7 +88,7 @@ basetgz=$base/base-$basetgz_version.tgz
 output_dir=$WORKSPACE/output
 work_dir=$WORKSPACE/work
 
-NEEDED_HOST_PACKAGES="mercurial pbuilder python-empy debhelper python-setuptools python-psutil"
+NEEDED_HOST_PACKAGES="mercurial pbuilder python-empy debhelper python-setuptools python-psutil gpgv"
 # python-argparse is integrated in libpython2.7-stdlib since raring
 # Check for precise in the HOST system (not valid DISTRO variable)
 if [[ $(lsb_release -sr | cut -c 1-5) == '12.04' ]]; then
