@@ -62,7 +62,8 @@ DELIM
 SOFTWARE_DIR="handsim"
 USE_OSRF_REPO=true
 # Dependencies only. No pkgs for: haptix or ignition
-DEPENDENCY_PKGS="${BASE_DEPENDENCIES}  \\
+DEPENDENCY_PKGS="mercurial ca-certificates \\
+                 ${BASE_DEPENDENCIES}  \\
                  ${IGN_TRANSPORT_DEPENDENCIES} \\
                  ${HAPTIX_COMM_DEPENDENCIES_WITHOUT_IGN} \\
 		 ${HANDSIM_DEPENDENCIES_WITHOUT_HAPTIX}"
