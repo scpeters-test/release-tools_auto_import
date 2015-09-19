@@ -17,7 +17,7 @@ echo '# BEGIN SECTION: building ignition-transport: ${IGN_BRANCH}'
 [[ -d ign-transport ]] && rm -fr ign-transport
 hg clone https://bitbucket.org/ignitionrobotics/ign-transport
 cd ign-transport
-mkdir build
+mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 make -j${MAKE_JOBS}
 make install
@@ -27,7 +27,7 @@ echo '# BEGIN SECTION: building haptix-comm: ${IGN_BRANCH}'
 [[ -d haptix-comm ]] && rm -fr haptix-comm
 hg clone https://bitbucket.org/osrf/haptix-comm
 cd haptix-comm
-mkdir build
+mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 make -j${MAKE_JOBS}
 make install
