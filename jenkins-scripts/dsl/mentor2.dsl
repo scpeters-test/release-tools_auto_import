@@ -97,7 +97,7 @@ supported_distros.each { distro ->
 
     // --------------------------------------------------------------
     // 2. Create the install test job
-    def install_default_job = job("install-gazebo_mentor2-pkg-${distro}-${arch}")
+    def install_default_job = job("mentor2-install-pkg-${distro}-${arch}")
 
     // Use the linux install as base
     OSRFLinuxInstall.create(install_default_job)
@@ -111,7 +111,7 @@ supported_distros.each { distro ->
         steps {
           shell("""#!/bin/bash -xe
 
-                export INSTALL_JOB_PKG=libgazebo6-dev
+                export INSTALL_JOB_PKG=mentor2
                 export INSTALL_JOB_REPOS=mentor2
                 /bin/bash -x ./scripts/jenkins-scripts/docker/generic-install-test-job.bash
                 """.stripIndent())

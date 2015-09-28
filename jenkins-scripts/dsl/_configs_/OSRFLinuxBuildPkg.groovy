@@ -35,8 +35,8 @@ class OSRFLinuxBuildPkg extends OSRFLinuxBase
       println("!!! token file was not found for setting the remote password")
       println("check your filesystem in the jenkins node for: ")
       println(token_file)
-      
-      System.exit(1)
+      // We can not use exit here, DSL job hangs
+      buildUnstable()
     }
 
     job.with
@@ -69,10 +69,13 @@ class OSRFLinuxBuildPkg extends OSRFLinuxBase
       steps {
         systemGroovyCommand("""\
           build.setDescription(
-          build.buildVariableResolver.resolve(VERSION) + '-' + 
-          build.buildVariableResolver.resolve(RELEASE_VERSION) + '<br />' +
-          '(' + build.buildVariableResolver.resolve(DISTRO) + '/' + 
-                build.buildVariableResolver.resolve(ARCH) + ')' + '<br />' + 
+          '<b>' + build.buildVariableResolver.resolve('VERSION') + '-' + 
+          build.buildVariableResolver.resolve('RELEASE_VERSION') + '</b>' +
+          '(' + build.buildVariableResolver.resolve('DISTRO') + '/' + 
+                build.buildVariableResolver.resolve('ARCH') + ')' +
+          '<br />' +
+          'branch: ' + build.buildVariableResolver.resolve('RELEASE_REPO_BRANCH') + ' | ' +
+          'upload to: ' + build.buildVariableResolver.resolve('UPLOAD_TO_REPO') +
           '<br />' +
           'RTOOLS_BRANCH: ' + build.buildVariableResolver.resolve('RTOOLS_BRANCH'));
           """.stripIndent()
