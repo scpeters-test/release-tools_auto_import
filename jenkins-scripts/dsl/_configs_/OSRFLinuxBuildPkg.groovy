@@ -66,6 +66,7 @@ class OSRFLinuxBuildPkg extends OSRFLinuxBase
         textParam("UPLOAD_TO_REPO", null, "OSRF repo name to upload the package to")
       }
 
+        /*
       steps {
         systemGroovyCommand("""\
           build.setDescription(
@@ -77,10 +78,11 @@ class OSRFLinuxBuildPkg extends OSRFLinuxBase
           'branch: ' + build.buildVariableResolver.resolve('RELEASE_REPO_BRANCH') + ' | ' +
           'upload to: ' + build.buildVariableResolver.resolve('UPLOAD_TO_REPO') +
           '<br />' +
-          'RTOOLS_BRANCH: ' + build.buildVariableResolver.resolve('RTOOLS_BRANCH'));
+          'RTOOLS_BRANCH: ' + build.buildVariableResolver.resolve('RTOOLS_BRANCH'))
           """.stripIndent()
         )
       }
+      */
 
       publishers {
         archiveArtifacts('pkgs/*')
