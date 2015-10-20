@@ -30,13 +30,15 @@ if $DART_FROM_PKGS; then
     fi
 fi
 
-# mesa-utils for dri checks and xsltproc for qtest->junit conversion
+# mesa-utils for dri checks, xsltproc for qtest->junit conversion and
+# python-psutil for memory testing
 BASE_DEPENDENCIES="build-essential \\
                    cmake           \\
                    debhelper       \\
                    mesa-utils      \\
                    cppcheck        \\
                    xsltproc        \\
+                   python-psutil   \\
                    python"
 
 # 1. SDFORMAT
@@ -138,6 +140,18 @@ GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
 if [[ ${GAZEBO_MAJOR_VERSION} -ge 6 ]]; then
     GAZEBO_BASE_DEPENDENCIES="${GAZEBO_BASE_DEPENDENCIES} \\
                               libignition-math2-dev"
+fi
+
+if [[ ${GAZEBO_MAJOR_VERSION} -ge 7 ]]; then
+    GAZEBO_BASE_DEPENDENCIES="${GAZEBO_BASE_DEPENDENCIES} \\
+                              libignition-transport0-dev"
+fi
+
+# libtinyxml2-dev is not on precise
+# it is needed by gazebo7, which isn't supported on precise
+if [[ ${DISTRO} != 'precise' ]]; then
+    GAZEBO_BASE_DEPENDENCIES="${GAZEBO_BASE_DEPENDENCIES} \\
+                              libtinyxml2-dev"
 fi
 
 GAZEBO_EXTRA_DEPENDENCIES="robot-player-dev \\
@@ -317,3 +331,12 @@ HANDSIM_DEPENDENCIES_WITHOUT_HAPTIX="libgazebo7-haptix-dev \\
                                      liboctave-dev"
 HANDSIM_DEPENDENCIES="${HANDSIM_DEPENDENCIES_WITHOUT_HAPTIX} \\
                       libhaptix-comm-dev"
+
+#
+# MENTOR2
+#
+MENTOR2_DEPENDENCIES="libgazebo6-dev    \\
+                      protobuf-compiler \\
+	              libprotobuf-dev   \\
+                      libboost1.54-dev  \\
+                      libqt4-dev"

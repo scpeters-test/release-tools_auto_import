@@ -2,6 +2,7 @@
 
 NIGHTLY_MODE=false
 if [ "${UPLOAD_TO_REPO}" = "nightly" ]; then
+   OSRF_REPOS_TO_USE="stable nightly"
    NIGHTLY_MODE=true
 fi
 
@@ -44,7 +45,7 @@ fi
 
 # Step 4: add debian/ subdirectory with necessary metadata files to unpacked source tarball
 rm -rf /tmp/$PACKAGE-release
-hg clone https://bitbucket.org/${BITBUCKET_REPO}/$PACKAGE-release /tmp/$PACKAGE-release 
+hg clone https://bitbucket.org/${BITBUCKET_REPO}/$PACKAGE-release /tmp/$PACKAGE-release
 cd /tmp/$PACKAGE-release
 # In nightly get the default latest version from default changelog
 if $NIGHTLY_MODE; then
@@ -52,7 +53,47 @@ if $NIGHTLY_MODE; then
     # dpkg-parsechangelog| grep Version | cut -f2 -d' '
     UPSTREAM_VERSION=\$( sed -n '/(/,/)/ s/.*(\([^)]*\)).*/\1 /p' ${DISTRO}/debian/changelog | head -n 1 | tr -d ' ' | sed 's:~.*::')
 fi
+
 hg up $RELEASE_REPO_BRANCH
+
+# Handle build metadata
+if [ ! -f build.metadata.bash ]; then
+    BUILD_METHOD="LEGACY"
+else
+    source build.metadata.bash
+fi
+
+case \${BUILD_METHOD} in
+    "OVERWRITE_BASE")
+	# 1. Clone the base branch
+        hg clone https://bitbucket.org/${BITBUCKET_REPO}/$PACKAGE-release \\
+	    -b \${RELEASE_BASE_BRANCH} \\
+	    /tmp/base_$PACKAGE-release
+	# 2. Overwrite the information
+	if [[ -d ${DISTRO} ]]; then
+          cp -a ${DISTRO}/debian/* /tmp/base_$PACKAGE-release/${DISTRO}/debian/
+	else
+	  echo "WARN: no files to overwrite where found. No ${DISTRO} directory in repo"
+        fi
+	# 3. Apply patches (if any)
+	if [[ -d patches/ ]]; then
+	    cp -a patches/*.patch /tmp/base_$PACKAGE-release
+	    pushd /tmp/base_$PACKAGE-release > /dev/null
+	    for p in /tmp/base_gazebo6-release/*.patch; do
+	      patch -p1 < \$p
+	    done
+	    patch -p1 < /tmp/base_$PACKAGE-release/*.patch
+	    popd > /dev/null
+	fi
+	# 4. swap directories
+	cd /tmp
+	rm -fr /tmp/$PACKAGE-release
+        mv /tmp/base_$PACKAGE-release /tmp/$PACKAGE-release
+	;;
+    "LEGACY")
+	echo "Legacy in place. Nothing needs to be done"
+	;;
+esac
 
 cd /tmp/$PACKAGE-release/${DISTRO}
 
@@ -68,7 +109,7 @@ if $NIGHTLY_MODE; then
               --changelog=debian/changelog -- "Nightly release: \${NIGHTLY_VERSION_SUFFIX}"
 fi
 
-# Get into the unpacked source directory, without explicit knowledge of that 
+# Get into the unpacked source directory, without explicit knowledge of that
 # directory's name
 cd \`find $WORKSPACE/build -mindepth 1 -type d |head -n 1\`
 # If use the quilt 3.0 format for debian (drcsim) it needs a tar.gz with sources
@@ -77,14 +118,14 @@ if $NIGHTLY_MODE; then
   echo | dh_make -s --createorig -p ${PACKAGE_ALIAS}_\${UPSTREAM_VERSION}~hg\${TIMESTAMP}r\${REV} > /dev/null
 fi
 
-# Adding extra directories to code. debian has no problem but some extra directories 
-# handled by symlinks (like cmake) in the repository can not be copied directly. 
+# Adding extra directories to code. debian has no problem but some extra directories
+# handled by symlinks (like cmake) in the repository can not be copied directly.
 # Need special care to copy, using first a --dereference
 cp -a --dereference /tmp/$PACKAGE-release/${DISTRO}/* .
 echo '# END SECTION'
 
 echo '# BEGIN SECTION: install build dependencies'
-mk-build-deps -r -i debian/control --tool 'apt-get --yes -o Debug::pkgProblemResolver=yes'
+mk-build-deps -r -i debian/control --tool 'apt-get --yes -o Debug::pkgProblemResolver=yes -o  Debug::BuildDeps=yes'
 echo '# END SECTION'
 
 if [ -f /usr/bin/rosdep ]; then
@@ -125,7 +166,7 @@ FOUND_PKG=0
 for pkg in \${PKGS}; do
     echo "found \$pkg"
     # Check for correctly generated packages size > 3Kb
-    test -z \$(find \$pkg -size +3k) && echo "WARNING: empty package?" 
+    test -z \$(find \$pkg -size +3k) && echo "WARNING: empty package?"
     # && exit 1
     cp \${pkg} $WORKSPACE/pkgs
     FOUND_PKG=1
@@ -135,7 +176,7 @@ test \$FOUND_PKG -eq 1 || exit 1
 echo '# END SECTION'
 DELIM
 
-USE_OSRF_REPO=true
+OSRF_REPOS_TO_USE=${OSRF_REPOS_TO_USE:=stable}
 DEPENDENCY_PKGS="devscripts \
 		 ubuntu-dev-tools \
 		 debhelper \
