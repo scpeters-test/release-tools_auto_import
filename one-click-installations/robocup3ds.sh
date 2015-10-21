@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+sudo apt-get install gazebo6-robocup3ds
+exit 0
+
 # The installation script is heavy based on get.docker.io script
 # 
 # Modfied by jrivero@osrfoundation.org
