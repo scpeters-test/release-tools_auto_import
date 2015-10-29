@@ -39,6 +39,22 @@ check_forked() {
 }
 
 do_install() {
+	if command_exists gazebo; then
+		cat >&2 <<-'EOF'
+			Warning: the "gazebo" command appears to already exist on this system.
+
+			If you already have gazebo installed, this script can cause trouble, which is
+			why we're displaying this warning and provide the opportunity to cancel the
+			installation.
+
+			If you installed the current robocup3ds gazebo package using this script and
+			are using it again to update the simulator, you can safely ignore this message.
+
+			You may press Ctrl+C now to abort this script.
+		EOF
+		( set -x; sleep 20 )
+	fi
+
 	user="$(id -un 2>/dev/null || true)"
 
 	sh_c='sh -c'
@@ -182,7 +198,6 @@ do_install() {
 			$sh_c "apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys D2486D2DD83DB69272AFE98867170598AF249743"
 			$sh_c "mkdir -p /etc/apt/sources.list.d"
 			$sh_c "echo deb http://packages.osrfoundation.org/gazebo/${lsb_dist} ${dist_version} main > /etc/apt/sources.list.d/gazebo-stable.list"
-			$sh_c "echo deb http://packages.osrfoundation.org/gazebo/${lsb_dist}-prerelease ${dist_version} main > /etc/apt/sources.list.d/gazebo-prerelease.list"
 			$sh_c 'sleep 3; apt-get update; apt-get install -y -q gazebo6-robocup3ds'
 			)
 			exit 0
