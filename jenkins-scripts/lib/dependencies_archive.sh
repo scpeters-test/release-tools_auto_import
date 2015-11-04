@@ -109,8 +109,6 @@ if [[ ${DISTRO} == 'precise' ]] || \
     bullet_pkg="libbullet2.82-dev"
 fi
 
-# tinyxml2-dev should deprecate libtinyxml-dev as soon as the
-# support is merged. To be removed.
 GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
                           libprotoc-dev                    \\
                           libprotobuf-dev                  \\
@@ -142,6 +140,11 @@ GAZEBO_BASE_DEPENDENCIES="libfreeimage-dev                 \\
 if [[ ${GAZEBO_MAJOR_VERSION} -ge 6 ]]; then
     GAZEBO_BASE_DEPENDENCIES="${GAZEBO_BASE_DEPENDENCIES} \\
                               libignition-math2-dev"
+fi
+
+if [[ ${GAZEBO_MAJOR_VERSION} -ge 7 ]]; then
+    GAZEBO_BASE_DEPENDENCIES="${GAZEBO_BASE_DEPENDENCIES} \\
+                              libignition-transport0-dev"
 fi
 
 # libtinyxml2-dev is not on precise
@@ -313,19 +316,20 @@ IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
 #
 # HAPTIX
 #
-HAPTIX_COMM_DEPENDENCIES="pkg-config                \\
-                          libignition-transport-dev \\
-                          libboost-system-dev       \\
-			  libprotoc-dev             \\
-			  libprotobuf-dev           \\
-			  protobuf-compiler         \\
+HAPTIX_COMM_DEPENDENCIES_WITHOUT_IGN="pkg-config  \\
+                          libboost-system-dev     \\
+			  libprotoc-dev           \\
+			  libprotobuf-dev         \\
+			  protobuf-compiler       \\
                 	  liboctave-dev"
-
+HAPTIX_COMM_DEPENDENCIES="${HAPTIX_COMM_DEPENDENCIES_WITHOUT_IGN} \\
+                          libignition-transport-dev"
 #
 # HANDSIM
 #
-HANDSIM_DEPENDENCIES="libgazebo7-haptix-dev \\
-                      liboctave-dev \\
+HANDSIM_DEPENDENCIES_WITHOUT_HAPTIX="libgazebo7-haptix-dev \\
+                                     liboctave-dev"
+HANDSIM_DEPENDENCIES="${HANDSIM_DEPENDENCIES_WITHOUT_HAPTIX} \\
                       libhaptix-comm-dev"
 
 #
