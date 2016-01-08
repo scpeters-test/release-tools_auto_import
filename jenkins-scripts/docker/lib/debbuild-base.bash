@@ -51,7 +51,7 @@ cd /tmp/$PACKAGE-release
 if $NIGHTLY_MODE; then
     # TODO: migrate to dpkg-parsechangelog
     # dpkg-parsechangelog| grep Version | cut -f2 -d' '
-    UPSTREAM_VERSION=\$( sed -n '/(/,/)/ s/.*(\([^)]*\)).*/\1 /p' ${DISTRO}/debian/changelog | head -n 1 | tr -d ' ' | sed 's:~.*::')
+    UPSTREAM_VERSION=\$( sed -n '/(/,/)/ s/.*(\([^)]*\)).*/\1 /p' ${DISTRO}/debian/changelog | head -n 1 | tr -d ' ' | sed 's:-[0-9]*~.*::' )
 fi
 
 hg up $RELEASE_REPO_BRANCH
@@ -114,7 +114,7 @@ cd \`find $WORKSPACE/build -mindepth 1 -type d |head -n 1\`
 # If use the quilt 3.0 format for debian (drcsim) it needs a tar.gz with sources
 if $NIGHTLY_MODE; then
   rm -fr .hg*
-  echo | dh_make -s --createorig -p ${PACKAGE_ALIAS}_\${UPSTREAM_VERSION}~hg\${TIMESTAMP}r\${REV} > /dev/null
+  echo | dh_make -s --createorig -p ${PACKAGE_ALIAS}_\${UPSTREAM_VERSION}+hg\${TIMESTAMP}r\${REV} > /dev/null
 fi
 
 # Adding extra directories to code. debian has no problem but some extra directories
