@@ -74,6 +74,11 @@ echo # BEGIN SECTION: install
 nmake install || goto :error
 echo # END SECTION
 
+echo # BEGIN SECTION: run tests nmake
+nmake tests ARGS="-VV --gtest_catch_exceptions"
+echo # END SECTION
+
+
 echo # BEGIN SECTION: run tests
 REM Need to find a way of running test from the standard make test (not working)
 ctest -C "%BUILD_TYPE%" --force-new-ctest-process -VV  || echo "tests failed"
