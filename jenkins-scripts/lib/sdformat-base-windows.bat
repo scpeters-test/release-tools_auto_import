@@ -76,7 +76,7 @@ echo # END SECTION
 
 echo # BEGIN SECTION: run tests
 REM Need to find a way of running test from the standard make test (not working)
-ctest -C "%BUILD_TYPE%" --verbose --extra-verbose || echo "test failed"
+ctest -C "%BUILD_TYPE%" --force-new-ctest-process -VV  || echo "tests failed"
 echo # END SECTION
 
 echo # BEGIN SECTION: export testing results
@@ -97,6 +97,6 @@ if NOT DEFINED KEEP_WORKSPACE (
 
 goto :EOF
 
-:error:error
+:error - error routine
 echo "The program is stopping with errors! Check the log" 
 exit /b %errorlevel%
