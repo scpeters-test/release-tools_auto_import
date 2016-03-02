@@ -101,7 +101,8 @@ fi
 output_dir=$WORKSPACE/output
 work_dir=$WORKSPACE/work
 
-NEEDED_HOST_PACKAGES="mercurial docker-engine python-setuptools python-psutil qemu-user-static gpgv"
+# TODO: Check for docker package
+NEEDED_HOST_PACKAGES="mercurial python-setuptools python-psutil qemu-user-static gpgv"
 # python-argparse is integrated in libpython2.7-stdlib since raring
 # Check for precise in the HOST system (not valid DISTRO variable)
 if [[ $(lsb_release -sr | cut -c 1-5) == '12.04' ]]; then
@@ -117,13 +118,11 @@ fi
 # not in the system. ^in if it is installed
 QUERY_RESULT=$(dpkg-query --list ${NEEDED_HOST_PACKAGES} 2>&1 | grep -v ^ii | grep -v '|' | grep -v '^\+++' | grep -v '^Desired') || true
 if [[ -n ${QUERY_RESULT} ]]; then
-
   sudo apt-get update
   sudo apt-get install -y ${NEEDED_HOST_PACKAGES}
 fi
 
-# Some packages will not show as ^un in the previous query but will return false if
-# they are not present
+# Check that all of them are present in the system, not returning false
 if [[ ! $(dpkg-query --list ${NEEDED_HOST_PACKAGES}) ]]; then
   echo "Some needed packages are failing in the host"
   exit 1
