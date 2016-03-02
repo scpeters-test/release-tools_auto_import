@@ -50,6 +50,39 @@ class OSRFLinuxCompilationAny
         }
       } // end of publishers
 
+      configure { project ->
+        project / publishers << 'hudson.plugins.postbuildtask.PostbuildTask' {
+          tasks
+          {
+            "hudson.plugins.postbuildtask.TaskProperties"
+            {
+              logTexts {
+                "hudson.plugins.postbuildtask.LogProperties" {
+                  logText('marked build as failure')
+                  operator('OR')
+                }
+                "hudson.plugins.postbuildtask.LogProperties" {
+                  logText('Build was aborted')
+                  operator('OR')
+                }
+                "hudson.plugins.postbuildtask.LogProperties" {
+                              logText('result to UNSTABLE')
+                  operator('OR')
+                }
+                "hudson.plugins.postbuildtask.LogProperties" {
+                  logText('result is FAILURE')
+                  operator('OR')
+                 }
+               }
+            } // end of TaskProperties
+            EscalateStatus(false)
+            RunIfJobSuccessful(false)
+            script('/bin/bash -xe ./scripts/jenkins-scripts/_bitbucket_set_status.bash failure')
+          } // end of tasks
+        } // end of project
+      } // end of configure
+
+
     } // end of with
   } // end of create method
 } // end of class
