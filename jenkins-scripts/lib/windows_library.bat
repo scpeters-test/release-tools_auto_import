@@ -112,6 +112,8 @@ goto :EOF
 :unzip_7za - Unzip using 7za
 ::
 :: arg1 - File to unzip
+echo Uncompressing %~1
+IF NOT exist %~1 ( echo "7za file does not exists: %~1" && goto :error )
 7za.exe x %~1 || goto :error
 goto :EOF
 
