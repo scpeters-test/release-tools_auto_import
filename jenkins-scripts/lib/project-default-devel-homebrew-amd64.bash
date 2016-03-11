@@ -4,7 +4,7 @@ set -e
 export HOMEBREW_MAKE_JOBS=${MAKE_JOBS}
 
 # Get project name as first argument to this script
-PROJECT=$1
+PROJECT=$1 # project will have the major version included (ex gazebo2)
 PROJECT_ARGS=${2}
 
 # In ignition projects, the name of the repo and the formula does not match
@@ -13,9 +13,8 @@ if [[ ${PROJECT/ignition} != ${PROJECT} ]]; then
     PROJECT_PATH="ign${PROJECT/ignition}"
 fi
 
-# Knowing Script dir beware of symlink
-[[ -L ${0} ]] && SCRIPT_DIR=$(readlink ${0}) || SCRIPT_DIR=${0}
-SCRIPT_DIR="${SCRIPT_DIR%/*}"
+export HOMEBREW_PREFIX=/usr/local
+export HOMEBREW_CELLAR=${HOMEBREW_PREFIX}/Cellar
 
 # make verbose mode?
 MAKE_VERBOSE_STR=""
@@ -24,34 +23,30 @@ if [[ ${MAKE_VERBOSE} ]]; then
 fi
 
 # Step 1. Set up homebrew
-RUN_DIR=$(mktemp -d ${HOME}/jenkins.XXXX)
-echo "Install into: ${RUN_DIR}"
-cd $RUN_DIR
-# Install homebrew
-curl -L -o homebrew.tar.gz https://github.com/Homebrew/homebrew/tarball/master 
-tar --strip 1 -xzf homebrew.tar.gz
+echo "# BEGIN SECTION: clean up ${HOMEBREW_PREFIX}"
+sudo chown -R jenkins ${HOMEBREW_PREFIX}
+cd ${HOMEBREW_PREFIX}
+[[ -f .git ]] && git clean -fdx
+rm -rf ${HOMEBREW_CELLAR} ${HOMEBREW_PREFIX}/.git && brew cleanup
+echo '# END SECTION'
 
-# Need to create cache so the system one (without permissions) is not used
-LOCAL_CELLAR=${HOME}/Library/Caches/Homebrew
-mkdir -p ${LOCAL_CELLAR}
+echo '# BEGIN SECTION: install latest homebrew'
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+echo '# END SECTION'
 
+echo '# BEGIN SECTION: brew information'
 # Run brew update to get latest versions of formulae
-${RUN_DIR}/bin/brew update
-
+brew update
 # Run brew config to print system information
-${RUN_DIR}/bin/brew config
-
+brew config
 # Run brew doctor to check for problems with the system
-${RUN_DIR}/bin/brew doctor || true
+# brew prune to fix some of this problems
+brew doctor || brew prune && brew doctor
+echo '# END SECTION'
 
-# Step 2. Install dependencies of ${PROJECT}
-${RUN_DIR}/bin/brew tap osrf/simulation
-
-# Unlink system dependencies first
-for dep in `/usr/local/bin/brew deps ${PROJECT} ${PROJECT_ARGS}`
-do
-  /usr/local/bin/brew unlink ${dep} || true
-done || true
+echo '# BEGIN SECTION: setup the osrf/simulation tap'
+brew tap osrf/simulation
+echo '# END SECTION'
 
 IS_A_HEAD_FORMULA=${IS_A_HEAD_PROJECT:-false}
 HEAD_STR=""
@@ -59,12 +54,12 @@ if $IS_A_HEAD_PROJECT; then
     HEAD_STR="--HEAD"
 fi
 
+echo "# BEGIN SECTION: install ${PROJECT} dependencies"
 # Process the package dependencies
-# Run twice! details about why in:
-# https://github.com/osrf/homebrew-simulation/pull/18#issuecomment-45041755 
-${RUN_DIR}/bin/brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
-${RUN_DIR}/bin/brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
+brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
+echo '# END SECTION'
 
+echo "# BEGIN SECTION: configuring ${PROJECT}"
 # Step 3. Manually compile and install ${PROJECT}
 cd ${WORKSPACE}/${PROJECT_PATH}
 # Need the sudo since the test are running with roots perms to access to GUI
@@ -72,14 +67,6 @@ sudo rm -fr ${WORKSPACE}/build
 mkdir -p ${WORKSPACE}/build
 cd ${WORKSPACE}/build
  
-
-# Mimic the homebrew variables
-export PKG_CONFIG_PATH=${RUN_DIR}/lib/pkgconfig
-export DYLD_FALLBACK_LIBRARY_PATH="$DYLD_FALLBACK_LIBRARY_PATH:${RUN_DIR}/lib"
-export PATH="${PATH}:${RUN_DIR}/bin"
-export C_INCLUDE_PATH="${C_INCLUDE_PATH}:${RUN_DIR}/include"
-export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${RUN_DIR}/include"
-
 # add X11 path so glxinfo can be found
 export PATH="${PATH}:/opt/X11/bin"
 
@@ -90,31 +77,34 @@ export DISPLAY=$(ps ax \
   | grep 'auth /Users/jenkins/' \
   | sed -e 's@.*Xquartz @@' -e 's@ .*@@'
 )
+ 
 
-${RUN_DIR}/bin/cmake ${WORKSPACE}/${PROJECT_PATH} \
-      -DCMAKE_INSTALL_PREFIX=${RUN_DIR}/Cellar/${PROJECT}/HEAD \
-      -DCMAKE_PREFIX_PATH=${RUN_DIR} \
-      -DCMAKE_FRAMEWORK_PATH=${RUN_DIR}/lib \
-      -DBOOST_ROOT=${RUN_DIR}
+# Hack to install into proper Cellar/PROJECT/VERSION
 
+# 1. run a cmake command just to be able to sniff the VERSION file
+cmake ${WORKSPACE}/${PROJECT}
+VERSION=$(cat VERSION) || { echo "No VERSION file found! Implement it in your pkg"; exit 1; }
+
+[[ -z ${VERSION} ]] && { echo "VERSION is empty!"; exit 1; }
+
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+      -DCMAKE_INSTALL_PREFIX=/usr/local/Cellar/${PROJECT}/HEAD \
+     ${WORKSPACE}/${PROJECT_PATH}
+echo "# BEGIN SECTION: compile and install ${PROJECT} ${VERSION}"
+
+echo "# BEGIN SECTION: compile and install ${PROJECT} ${VERSION}"
 make -j${MAKE_JOBS} ${MAKE_VERBOSE_STR} install
-${RUN_DIR}/bin/brew link ${PROJECT}
+brew link ${PROJECT}
+echo '# END SECTION'
 
-cat > test_run.sh << DELIM
-cd $WORKSPACE/build/
-export PKG_CONFIG_PATH=${RUN_DIR}/lib/pkgconfig
-export DYLD_FALLBACK_LIBRARY_PATH=${RUN_DIR}/lib
-export BOOST_ROOT=${RUN_DIR}
-export PATH="${PATH}:${RUN_DIR}/bin"
-export CMAKE_PREFIX_PATH=${RUN_DIR}
+echo "#BEGIN SECTION: docker analysis"
+brew doctor
+echo '# END SECTION'
 
+echo "# BEGIN SECTION: run tests"
 # Need to clean up models before run tests (issue 27)
 rm -fr \$HOME/.gazebo/models
+
+cd $WORKSPACE/build/
 make test ARGS="-VV" || true
-DELIM
-
-chmod +x test_run.sh
-sudo  ./test_run.sh
-
-# Step 5. Clean up
-rm -fr ${RUN_DIR}
+echo '# END SECTION'
