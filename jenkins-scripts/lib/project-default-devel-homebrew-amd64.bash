@@ -65,6 +65,9 @@ fi
 ${RUN_DIR}/bin/brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
 ${RUN_DIR}/bin/brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
 
+# Install some python dependencies
+${RUN_DIR}/bin/brew install python
+
 # Step 3. Manually compile and install ${PROJECT}
 cd ${WORKSPACE}/${PROJECT_PATH}
 # Need the sudo since the test are running with roots perms to access to GUI
@@ -76,9 +79,11 @@ cd ${WORKSPACE}/build
 # Mimic the homebrew variables
 export PKG_CONFIG_PATH=${RUN_DIR}/lib/pkgconfig
 export DYLD_FALLBACK_LIBRARY_PATH="$DYLD_FALLBACK_LIBRARY_PATH:${RUN_DIR}/lib"
-export PATH="${PATH}:${RUN_DIR}/bin"
+export PATH="${RUN_DIR}/bin:${PATH}"
 export C_INCLUDE_PATH="${C_INCLUDE_PATH}:${RUN_DIR}/include"
 export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:${RUN_DIR}/include"
+export PYTHONPATH="${RUN_DIR}/lib/python2.7/site-packages:${PYTHONPATH}"
+pip install lxml psutil
 
 # add X11 path so glxinfo can be found
 export PATH="${PATH}:/opt/X11/bin"
@@ -109,8 +114,25 @@ export PATH="${PATH}:${RUN_DIR}/bin"
 export CMAKE_PREFIX_PATH=${RUN_DIR}
 
 # Need to clean up models before run tests (issue 27)
-rm -fr \$HOME/.gazebo/models
-make test ARGS="-VV" || true
+rm -fr \$HOME/.gazebo/models test_results*
+if ! make test ARGS="-VV"; then
+  mv test_results test_results0
+  make test ARGS="-VV --rerun-failed" || true
+  echo contents of test_results
+  ls test_results
+  echo contents of test_results0
+  ls test_results0
+  mkdir test_results_tmp
+  for i in \$(ls test_results); do
+    echo looking for flaky tests in test_results0/\$i and test_results/\$i
+    python ${WORKSPACE}/scripts/jenkins-scripts/tools/flaky_junit_merge.py \
+      test_results0/\$i test_results/\$i \
+      > test_results_tmp/\$i
+    mv test_results_tmp/\$i test_results0
+  done
+  mv test_results test_results1
+  mv test_results0 test_results
+fi
 DELIM
 
 chmod +x test_run.sh
