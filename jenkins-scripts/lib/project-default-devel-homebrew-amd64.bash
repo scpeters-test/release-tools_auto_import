@@ -106,10 +106,27 @@ echo '# END SECTION'
 
 echo "# BEGIN SECTION: run tests"
 # Need to clean up models before run tests (issue 27)
-rm -fr \$HOME/.gazebo/models
+rm -fr \$HOME/.gazebo/models test_results*
 
 cd $WORKSPACE/build/
-make test ARGS="-VV" || true
+if ! make test ARGS="-VV"; then
+  mv test_results test_results0
+  make test ARGS="-VV --rerun-failed" || true
+  echo contents of test_results
+  ls test_results
+  echo contents of test_results0
+  ls test_results0
+  mkdir test_results_tmp
+  for i in $(ls test_results); do
+    echo looking for flaky tests in test_results0/$i and test_results/$i
+    python ${WORKSPACE}/scripts/jenkins-scripts/tools/flaky_junit_merge.py \
+      test_results0/$i test_results/$i \
+      > test_results_tmp/$i
+    mv test_results_tmp/$i test_results0
+  done
+  mv test_results test_results1
+  mv test_results0 test_results
+fi
 echo '# END SECTION'
 
 echo "# BEGIN SECTION: re-add group write permissions"
