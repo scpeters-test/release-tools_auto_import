@@ -17,6 +17,7 @@ else
   cp -R ${WORKSPACE}/gazebo ${WORKSPACE}/${gazeboN}
 fi
 
+BREW_PACKAGES_NEEDED=qt5
 . ${SCRIPT_DIR}/lib/project-default-devel-homebrew-amd64.bash ${gazeboN} \
   "--with-ffmpeg --with-bullet --with-simbody"
 
