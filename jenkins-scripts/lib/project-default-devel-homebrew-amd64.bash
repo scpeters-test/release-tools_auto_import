@@ -66,6 +66,7 @@ echo '# END SECTION'
 
 if [[ -n "${BREW_PACKAGES_NEEDED}" ]]; then
   brew install ${BREW_PACKAGES_NEEDED}
+  export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt5
 fi
 
 if [[ -n "${PIP_PACKAGES_NEEDED}" ]]; then
