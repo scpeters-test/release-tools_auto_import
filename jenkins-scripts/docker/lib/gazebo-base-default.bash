@@ -4,9 +4,15 @@
 #  - GAZEBO_BASE_CMAKE_ARGS (optional) extra arguments to pass to cmake
 #  - GAZEBO_BASE_TESTS_HOOK (optional) [default to run UNIT, INTEGRATION, REGRESSION, EXAMPLE]
 #                           piece of code to run in the testing section
+#  - GAZEBO_BUILD_$DEP      (optional) [default false] 
+#                           build dependencies from source. 
+#                           DEP = SDFORMAT | IGN_MATH | IGN_TRANSPORT
+#                           branch parameter = $DEP_BRANCH
 
 #stop on error
 set -e
+
+GAZEBO_OSRF_DEPS="SDFORMAT IGN_MATH IGN_TRANSPORT"
 
 . ${SCRIPT_DIR}/lib/_gazebo_version_hook.bash
 
@@ -21,7 +27,7 @@ if [[ ${GAZEBO_BASE_CMAKE_ARGS} != ${GAZEBO_BASE_CMAKE_ARGS/Coverage} ]]; then
   EXTRA_PACKAGES="${EXTRA_PACKAGES} lcov" 
 fi
 
-cat > build.sh << DELIM
+cat > build.sh << DELIM_DART
 ###################################################
 # Make project-specific changes here
 #
@@ -47,11 +53,44 @@ if $DART_COMPILE_FROM_SOURCE; then
   make install
   echo '# END SECTION'
 fi
+DELIM_DART
 
+# Process the source build of dependencies if needed
+for dep_uppercase in $GAZEBO_OSRF_DEPS; do
+  dep=`echo $dep_uppercase | tr '[:upper:]' '[:lower:]'`
+  EXTRA_PACKAGES="${EXTRA_PACKAGES} mercurial"
+
+  if $(eval $\GAZEBO_BUILD_$dep_uppercase); then
+      # Handle the depedency BRANCH
+      $(eval dep_branch=$\GAZEBO_BUILD_$dep_uppercase\_BRANCH)
+      [[ -z ${dep_branch} ]] && dep_branch='default'
+cat >> build.sh << DELIM_BUILD_DEPS  
+    echo "#BEGIN SECTION: building dependency: ${dep} (${dep_branch})"
+    rm -fr $WORKSPACE/$dep
+
+    if [[ ${dep/ign} == ${dep} ]]; then
+      bitbucket_repo="osrf/${dep}"
+    else
+      bitbucket_repo="ignitionrobotics/${dep}"
+    fi
+
+    hg clone http://bitbucket.org/\$bitbucket_repo -b ${dep_branch} \
+	$WORKSPACE/$dep 
+
+    GENERIC_ENABLE_CPPCHECK=false
+    GENERIC_ENABLE_TESTS=false 
+    SOFTWARE_DIR=$dep
+    . ${WORKSPACE}/${SCRIPT_DIR}/lib/_generic_linux_compilation_build.sh.bash
+    /bin/bash -xe build.sh
+DELIM_BUILD_DEPS
+  fi
+done
+
+cat >> build.sh << DELIM
 # Normal cmake routine for Gazebo
 echo '# BEGIN SECTION: Gazebo configuration'
 rm -rf $WORKSPACE/install
-mkdir -p $WORKSPACE/install
+mkdir -p $WORKSPACE/install $WORKSPACE/build
 cd $WORKSPACE/build
 cmake ${GAZEBO_BASE_CMAKE_ARGS}      \\
     -DCMAKE_INSTALL_PREFIX=/usr      \\
