@@ -9,18 +9,30 @@ sudo mkdir -p ${WORKSPACE}/build
 sudo docker build -t ${DOCKER_TAG} .
 stop_stopwatch CREATE_TESTING_ENVIROMENT
 
+cat >> build.sh << DELIM_CCACHE_BUILD
+echo '# BEGIN SECTION: see ccache statistics'
+ccache -s
+echo '# END SECTION'
+DELIM_CCACHE_BUILD
+
 echo '# BEGIN SECTION: see build.sh script'
 cat build.sh
 echo '# END SECTION'
 
 if $USE_GPU_DOCKER; then
-  GPU_PARAMS_STR="--privileged \
+  EXTRA_PARAMS_STR="--privileged \
                   -e DISPLAY=unix$DISPLAY \
                   -v /sys:/sys:ro         \
                   -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
 fi
 
-sudo docker run $GPU_PARAMS_STR  \
+if $ENABLE_CCACHE; then
+  EXTRA_PARAMS_STR="-e CCACHE_DIR=${CCACHE_DIR} \
+                    -v ${CCACHE_DIR}:${CCACHE_DIR} \
+                    ${EXTRA_PARAMS_STR}"
+fi
+
+sudo docker run $EXTRA_PARAMS_STR  \
             --cidfile=${CIDFILE} \
             -v ${WORKSPACE}:${WORKSPACE} \
             -t ${DOCKER_TAG} \
@@ -43,7 +55,7 @@ if [[ -z ${KEEP_WORKSPACE} ]]; then
     # Mimic old layout of exported test results
     mkdir ${WORKSPACE}/build
     for d in $(find ${WORKSPACE} -name '*_results' -type d); do
-       sudo mv ${d} ${WORKSPACE}/build/
+       udo mv ${d} ${WORKSPACE}/build/
     done
     
     sudo chown jenkins -R ${WORKSPACE}/build/

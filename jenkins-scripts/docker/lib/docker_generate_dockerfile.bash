@@ -253,6 +253,13 @@ ENV LANGUAGE en_GB
 ENV QT_X11_NO_MITSHM 1
 DELIM_WORKAROUND_91
 
+if $ENABLE_CCACHE; then
+cat >> Dockerfile << DELIM_CCACHE
+ENV PATH /usr/lib/ccache:\$PATH
+RUN CCACHE_DIR=${CCACHE_DIR} ccache -s
+DELIM_CCACHE
+fi
+
 cat >> Dockerfile << DELIM_DOCKER4
 COPY build.sh build.sh
 RUN chmod +x build.sh
