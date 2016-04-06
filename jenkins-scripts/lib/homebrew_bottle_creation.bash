@@ -23,7 +23,9 @@ echo '# END SECTION'
 echo '# BEGIN SECTION: run test-bot'
 # The test-bot makes a full cleanup of all installed pkgs. Be sure of install back
 # mercurial to keep the slave working
-brew test-bot --tap=osrf/simulation --ci-pr --bottle --verbose ${PULL_REQUEST_URL} || brew install hg
+brew test-bot --tap=osrf/simulation \
+              --ci-pr ${PULL_REQUEST_URL} \
+	     || { brew install hg; exit -1 }
 brew install hg
 echo '# END SECTION'
 
