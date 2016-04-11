@@ -2,7 +2,7 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-def ignition_software         = [ 'transport', 'math', 'msgs' ]
+def ignition_software         = [ 'transport', 'math', 'msgs', 'common' ]
 def ignition_transport_series = '' // empty for a unversioned -dev package
 def ignition_math_series      = '2'
 
@@ -243,6 +243,7 @@ ignition_software.each { ign_sw ->
               """.stripIndent())
       }
   }
+}
 
   // 2. default
   def ignition_brew_ci_job = job("ignition_${ign_sw}-ci-default-homebrew-amd64")
@@ -288,6 +289,7 @@ ignition_software.each { ign_sw ->
               """.stripIndent())
       }
   }
+}
 
   // 2. default
   def ignition_win_ci_job = job("ignition_${ign_sw}-ci-default-windows7-amd64")
