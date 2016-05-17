@@ -337,7 +337,16 @@ IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
                             protobuf-compiler    \\
                             uuid-dev             \\
                             libzmq3-dev          \\
+                            libignition-msgs-dev \\
                             libczmq-dev"
+
+IGN_COMMON_DEPENDENCIES="pkg-config            \\
+                         python                \\
+                         ruby-ronn             \\
+                         uuid-dev              \\
+                         libignition-math2-dev \\
+                         libfreeimage-dev      \\
+                         uuid-dev"
 
 #
 # HAPTIX
