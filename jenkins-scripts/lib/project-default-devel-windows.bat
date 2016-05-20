@@ -3,7 +3,7 @@
 :: Parameters:
 ::   - VCS_DIRECTORY : WORKSPACE/VCS_DIRECTORY should contain the sources
 ::   - BUILD_TYPE    : (default Release) [ Release | Debug ] Build type to use
-::   - DEPENDENCY_PKG: (optional) one package as dependency (only one is supported by now)
+::   - DEPENDENCY_PKG: (optional) comma separated list of packages as dependencies
 ::   - KEEP_WORKSPACE: (optional) true | false. Clean workspace at the end
 ::
 :: Actions
@@ -14,6 +14,8 @@
 ::   - run tests
 
 set win_lib=%SCRIPT_DIR%\lib\windows_library.bat
+set TEST_RESULT_PATH=%WORKSPACE%\test_results
+set TEST_RESULT_PATH_LEGACY=%WORKSPACE%\build\test_results
 
 @if "%BUILD_TYPE%" == "" set BUILD_TYPE=Release
 
@@ -44,12 +46,16 @@ mkdir workspace
 cd workspace
 echo # END SECTION
 
-echo # BEGIN SECTION: downloading and unzip dependency %DEPENDENCY_PKG%
+echo # BEGIN SECTION: downloading and unzip dependencies: %DEPENDENCY_PKG%
 REM Todo: support multiple dependencies
 if defined DEPENDENCY_PKG (
   call %win_lib% :download_7za
-  call %win_lib% :wget http://packages.osrfoundation.org/win32/deps/%DEPENDENCY_PKG% %DEPENDENCY_PKG% || goto :error
-  call %win_lib% :unzip_7za %DEPENDENCY_PKG% %DEPENDENCY_PKG% > install.log || goto:error
+
+  for %%p in (%DEPENDENCY_PKG%) do (
+    echo "Downloading %%p"
+    call %win_lib% :wget http://packages.osrfoundation.org/win32/deps/%%p %%p || goto :error
+    call %win_lib% :unzip_7za %%p %%p > install.log || goto:error
+  )
 )
 echo # END SECTION
 
@@ -67,6 +73,9 @@ if exist ..\configure.bat (
   echo # BEGIN SECTION: configuring %VCS_DIRECTORY% using cmake 
   cmake .. %VS_CMAKE_GEN% %VS_DEFAULT_CMAKE_FLAGS% %ARG_CMAKE_FLAGS% || goto :error
 )
+
+echo "Workaround: to always enable the test compilation (configure.bat usually set it to false)
+cmake .. -DENABLE_TESTS_COMPILATION:BOOL=True || echo "second run of cmake for enable tests failed"
 echo # END SECTION
 
 echo # BEGIN SECTION: compiling %VCS_DIRECTORY%
@@ -77,15 +86,18 @@ nmake install || goto %win_lib% :error
 echo # END SECTION
 
 echo # BEGIN SECTION: running tests
-REM Need to find a way of running test from the standard make test (not working)
 cd %WORKSPACE%\workspace\haptix-comm\build
-ctest -C "%BUILD_TYPE%" --verbose --extra-verbose || echo "test failed"
+REM nmake test is not working test/ directory exists and nmake is not
+REM able to handle it.
+ctest -C "%BUILD_TYPE%" --force-new-ctest-process -VV  || echo "tests failed"
 echo # END SECTION
 
 echo # BEGIN SECTION: export testing results
-set TEST_RESULT_PATH=%WORKSPACE%\test_results
 if exist %TEST_RESULT_PATH% ( rmdir /q /s %TEST_RESULT_PATH% )
-move test_results %TEST_RESULT_PATH% || goto :error
+if exist %TEST_RESULT_PATH_LEGACY% ( rmdir /q /s %TEST_RESULT_PATH_LEGACY% )
+mkdir %WORKSPACE%\build\
+xcopy test_results %TEST_RESULT_PATH% /s /i /e || goto :error
+xcopy %TEST_RESULT_PATH% %TEST_RESULT_PATH_LEGACY% /s /e /i
 echo # END SECTION
 
 if NOT DEFINED KEEP_WORKSPACE (
