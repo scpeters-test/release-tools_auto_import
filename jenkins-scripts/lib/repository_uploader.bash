@@ -150,7 +150,7 @@ for pkg in `ls $pkgs_path/*.bottle.tar.gz`; do
   fi
   
   # Get the canonical package name (i.e. gazebo2 -> gazebo)
-  pkg_root_name=$(sed -e 's:[[:digit:]]*$::' <<< ${pkg})
+  pkg_root_name=$(sed -e 's@[[:digit:]]*$@@' <<< ${pkg})
 
   # Seems important to upload the path with a final slash
   S3_upload ${pkg_root_name} "${S3_UPLOAD_PATH}/"
