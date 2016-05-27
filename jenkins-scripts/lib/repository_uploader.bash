@@ -51,7 +51,7 @@ upload_package()
     [[ -z ${pkg} ]] && echo "Bad parameter pkg" && exit 1
 
     # Get the canonical package name (i.e. gazebo2 -> gazebo)
-    pkg_root_name=$(sed -e 's:[[:digit:]]*$::' <<< ${pkg})
+    pkg_root_name=$(sed -e 's@[[:digit:]]*$@@' <<< ${pkg})
 
     sudo GNUPGHOME=$HOME/.gnupg reprepro --nothingiserror includedeb $DISTRO ${pkg}
 

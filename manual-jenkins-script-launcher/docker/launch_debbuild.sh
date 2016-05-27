@@ -9,7 +9,7 @@ if [[ ${#} -lt 2 ]]; then
 fi
 
 export PACKAGE=${1}
-pkg_root_name=${PACKAGE%[[:digit:]]}
+pkg_root_name=$(sed -e 's@[[:digit:]]*$@@' <<< ${PACKAGE})
 
 export VERSION=${2}
 export RELEASE_VERSION=${3-1}
