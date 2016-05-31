@@ -159,6 +159,15 @@ bottle_job_builder.with
    publishers {
      archiveArtifacts("${directory_for_bottles}/*")
 
+     // Hack to access to the PACKAGE job parameter. Not directly supported by
+     // jenkins dsl so use the jenkins groovy engine.
+     import hudson.model.*
+     Build build = Executor.currentExecutor().currentExecutable
+     ParametersAction parametersAction = build.getAction(ParametersAction)
+     PACKAGE_PARAM = parametersAction.getParameter('PACKAGE').getValue() 
+
+     package_canonical = PACKAGE_PARAM.replaceAll('[0-9]*$', '');
+
      // call to the repository_uploader_ng to upload to S3 the binary
      downstreamParameterized
      {
@@ -167,7 +176,7 @@ bottle_job_builder.with
           parameters {
             currentBuild()
               predefinedProp("PROJECT_NAME_TO_COPY_ARTIFACTS", "\${JOB_NAME}")
-              predefinedProp("S3_UPLOAD_PATH", "\${PACKAGE}/releases")
+              predefinedProp("S3_UPLOAD_PATH", "\${package_canonical}/releases/")
               predefinedProp("UPLOAD_TO_REPO", "only_s3_upload")
               predefinedProp("ARCH",           "64bits")
           }
