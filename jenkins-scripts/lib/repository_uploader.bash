@@ -150,7 +150,7 @@ for pkg in `ls $pkgs_path/*.bottle.tar.gz`; do
   fi
   
   # Seems important to upload the path with a final slash
-  S3_upload ${pkg_root_name} "${S3_UPLOAD_PATH}/"
+  S3_upload ${pkg} "${S3_UPLOAD_PATH}/"
 done
 
 # Check for no reprepro uploads to finish here
