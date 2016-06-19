@@ -23,6 +23,8 @@ echo '# END SECTION'
 echo '# BEGIN SECTION: run test-bot'
 # The test-bot makes a full cleanup of all installed pkgs. Be sure of install back
 # mercurial to keep the slave working
+git -C /usr/local/Library/Homebrew remote add scpeters https://github.com/scpeters/brew
+git -C /usr/local/Library/Homebrew checkout test-bot_conflicts
 export HOMEBREW_DEVELOPER=1
 brew test-bot --tap=osrf/simulation \
               --ci-pr ${PULL_REQUEST_URL} \
