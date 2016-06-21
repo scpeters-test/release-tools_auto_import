@@ -119,7 +119,7 @@ brew link ${PROJECT}
 echo '# END SECTION'
 
 echo "#BEGIN SECTION: brew doctor analysis"
-brew doctor
+brew doctor || true
 echo '# END SECTION'
 
 echo "# BEGIN SECTION: run tests"
