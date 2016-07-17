@@ -237,7 +237,8 @@ cat >> Dockerfile << DELIM_WORKAROUND_91
 # https://bitbucket.org/osrf/handsim/issue/91
 RUN echo "en_GB.utf8 UTF-8" >> /etc/locale.gen
 RUN chmod +x build.sh
-RUN update-locale LANG=en_GB.utf8 LC_ALL=en_GB.utf8
+RUN locale-gen en_GB.utf8
+RUN chmod +x build.sh
 ENV LC_ALL en_GB.utf8
 ENV LANG en_GB.utf8
 ENV LANGUAGE en_GB
