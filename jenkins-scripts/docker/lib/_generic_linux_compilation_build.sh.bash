@@ -18,11 +18,7 @@ if [[ -z $GENERIC_ENABLE_TESTS ]]; then
   GENERIC_ENABLE_TESTS=true
 fi
 
-cat > build.sh << DELIM
-#!/bin/bash
-set -ex
-source ${TIMING_DIR}/_time_lib.sh ${WORKSPACE}
-
+cat >> build.sh << DELIM
 echo '# BEGIN SECTION: configure'
 # Step 2: configure and build
 cd $WORKSPACE

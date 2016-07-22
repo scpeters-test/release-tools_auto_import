@@ -13,6 +13,13 @@ OSRF_REPOS_TO_USE=${BUILDING_JOB_REPOSITORIES}
 DEPENDENCY_PKGS="${BASE_DEPENDENCIES} ${ARCHIVE_PROJECT_DEPENDECIES} ${BUILDING_DEPENDENCIES}"
 SOFTWARE_DIR="${BUILDING_SOFTWARE_DIRECTORY}"
 
+# Standard header
+cat > build.sh << DELIM
+#!/bin/bash
+set -ex
+source ${TIMING_DIR}/_time_lib.sh ${WORKSPACE}
+DELIM
+
 . ${SCRIPT_DIR}/lib/_generic_linux_compilation_build.sh.bash
 
 . ${SCRIPT_DIR}/lib/docker_generate_dockerfile.bash
