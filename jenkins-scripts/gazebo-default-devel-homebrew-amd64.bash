@@ -21,6 +21,7 @@ if [ $GAZEBO_MAJOR_VERSION -ge 7 ]; then
   RERUN_FAILED_TESTS=1
 fi
 
+BREW_PACKAGES_NEEDED=qt5
 . ${SCRIPT_DIR}/lib/project-default-devel-homebrew-amd64.bash ${gazeboN} \
   "--with-ffmpeg --with-bullet --with-simbody"
 
