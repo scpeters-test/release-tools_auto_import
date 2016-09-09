@@ -46,25 +46,6 @@ class OSRFLinuxCompilationAnyGitHub
         }
       }
 
-      triggers {
-        githubPullRequest {
-            admins(['osrf-jenkins', 'j-rivero'])
-            useGitHubHooks()
-            cron('')
-            triggerPhrase('run test please')
-            allowMembersOfWhitelistedOrgsAsAdmin()
-            // Only will be triggered in supported_ros_branches
-            whiteListTargetBranches(supported_ros_branches)
-            permitAll(true)
-            extensions {
-                commitStatus {
-                    context('${JOB_NAME}')
-                    triggeredStatus('starting deployment to build.osrfoundation.org')
-                    startedStatus('deploying to build.osrfoundation.org')
-                }
-            }
-        }
-      } // end of triggers
-    } // end of with
+          } // end of with
   } // end of create method
 } // end of class
