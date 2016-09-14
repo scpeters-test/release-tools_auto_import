@@ -116,7 +116,7 @@ ros_distros.each { ros_distro ->
               extensions {
                 relativeTargetDirectory("gazebo_ros_pkgs")
               }
-              branch('default')
+              branch("${ros_distro}-devel")
             }
           }
         }
