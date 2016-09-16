@@ -104,6 +104,7 @@ ros_distros.each { ros_distro ->
         // 1. -deafult-
         def default_name = "ros_gazebo${gz_version}_pkg-default-${ubuntu_distro}-${ci_arch}"
         def def_job = job(default_name)
+        OSRFLinuxCompilation.create(def_job, true, false)
 
         def_job.with
         {
