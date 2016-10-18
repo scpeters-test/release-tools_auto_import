@@ -58,11 +58,11 @@ brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
 echo '# END SECTION'
 
 if [[ -n "${BREW_PACKAGES_NEEDED}" ]]; then
+  brew remove qt qwt
   brew install ${BREW_PACKAGES_NEEDED}
   export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt52
   export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt55
   export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt5
-  brew remove qt
 fi
 
 if [[ "${RERUN_FAILED_TESTS}" -gt 0 ]]; then
