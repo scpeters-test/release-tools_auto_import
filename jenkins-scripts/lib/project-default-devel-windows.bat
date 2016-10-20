@@ -21,8 +21,10 @@ set LOCAL_WS=%WORKSPACE%\workspace
 set LOCAL_WS_SOFTWARE_DIR=%LOCAL_WS%\%VCS_DIRECTORY%
 
 :: default values
-@if "%BUILD_TYPE%" == "" set BUILD_TYPE=Release
-@if "%ENABLE_TESTS%" == "" set ENABLE_TESTS=TRUE
+if "%BUILD_TYPE%" == "" set BUILD_TYPE=Release
+if "%ENABLE_TESTS%" == "" set ENABLE_TESTS=TRUE
+
+echo "FOO: %ENABLE_TESTS%"
 
 :: safety checks
 if not defined VCS_DIRECTORY (
@@ -107,6 +109,7 @@ if %ENABLE_TESTS% == "TRUE" (
 
 if NOT DEFINED KEEP_WORKSPACE (
    echo # BEGIN SECTION: clean up workspace
+   cd %WORKSPACE%
    rmdir /s /q %LOCAL_WS% || goto :error
    echo # END SECTION
 )
