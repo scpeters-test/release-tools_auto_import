@@ -57,6 +57,14 @@ echo "# BEGIN SECTION: install ${PROJECT} dependencies"
 brew install ${HEAD_STR} ${PROJECT} ${PROJECT_ARGS} --only-dependencies
 echo '# END SECTION'
 
+if [[ -n "${BREW_PACKAGES_NEEDED}" ]]; then
+  brew remove qt qwt
+  brew install ${BREW_PACKAGES_NEEDED}
+  export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt52
+  export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt55
+  export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/usr/local/opt/qt5
+fi
+
 if [[ "${RERUN_FAILED_TESTS}" -gt 0 ]]; then
   # Install lxml for flaky_junit_merge.py
   PIP_PACKAGES_NEEDED="${PIP_PACKAGES_NEEDED} lxml"
@@ -104,7 +112,7 @@ brew link ${PROJECT}
 echo '# END SECTION'
 
 echo "#BEGIN SECTION: brew doctor analysis"
-brew doctor
+brew doctor || true
 echo '# END SECTION'
 
 echo "# BEGIN SECTION: run tests"
