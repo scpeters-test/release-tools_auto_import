@@ -9,12 +9,15 @@ ${BREW_BINARY} up
 # Clear all installed homebrew packages, links, taps, and kegs
 BREW_LIST=$(${BREW_BINARY} list)
 if [[ -n "${BREW_LIST}" ]]; then
-  ${BREW_BINARY} remove --force ${BREW_LIST}
+  ${BREW_BINARY} remove --force --ignore-dependencies ${BREW_LIST}
 fi
 rm -rf /usr/local/lib/python2.7/site-packages
 # redirect error to /dev/null to avoid temporal problems detected by
 # brew tap
-for t in $(${BREW_BINARY} tap 2>/dev/null | grep '^[^/]\+/[^/]\+$' | grep -v '^homebrew/core$'); do
+for t in $(HOMEBREW_NO_AUTO_UPDATE=1 \
+          ${BREW_BINARY} tap 2>/dev/null \
+          | grep '^[^/]\+/[^/]\+$' \
+          | grep -v '^homebrew/core$'); do
   ${BREW_BINARY} untap $t
 done
 
