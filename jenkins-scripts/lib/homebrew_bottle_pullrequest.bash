@@ -34,10 +34,12 @@ fi
 
 for F_WITH_NEW_HASH in ${FILES_WITH_NEW_HASH}; do
   # Need to get the formula name and version from json
-  VERSION=$(${BREW} ruby -e \
-  "puts Utils::JSON.load(IO.read(\"${F_WITH_NEW_HASH}\")).values[0]['formula']['pkg_version']")
-  FORMULA_FULL_NAME=$(${BREW} ruby -e \
-    "puts Utils::JSON.load(IO.read(\"${F_WITH_NEW_HASH}\")).keys[0]")
+  VERSION=$(python -c "
+import json; with open('${F_WITH_NEW_HASH}', 'r') as f:
+    print(json.loads(f.read()).values[0]['formula']['pkg_version'])")
+  FORMULA_FULL_NAME=$(python -c "
+import json; with open('${F_WITH_NEW_HASH}', 'r') as f:
+    print(json.loads(f.read()).keys[0])")
   # FORMULA_FULL_NAME is osrf/similation/$package_name
   PACKAGE_ALIAS=${FORMULA_FULL_NAME##*/}
   # Use it to get the formula path
