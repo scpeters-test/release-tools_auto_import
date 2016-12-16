@@ -22,6 +22,14 @@ if [ $GAZEBO_MAJOR_VERSION -ge 7 ]; then
 fi
 
 BREW_PACKAGES_NEEDED='qt5 qwt'
+
+if [[ $GAZEBO_MAJOR_VERSION -ge 8 ]]; then
+PRE_TESTS_EXECUTION_HOOK="""
+echo '#BEGIN SECTION: compile the tests suite'
+make tests \${MAKE_VERBOSE_STR}
+echo '# END SECTION'
+"""
+fi
+
 . ${SCRIPT_DIR}/lib/project-default-devel-homebrew-amd64.bash ${gazeboN} \
   "--with-ffmpeg --with-bullet --with-simbody"
-
