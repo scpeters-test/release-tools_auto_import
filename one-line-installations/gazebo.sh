@@ -142,7 +142,12 @@ do_install() {
 
 	case "$lsb_dist" in
 
-		ubuntu|linuxmint)
+		linuxmint)
+			lsb_dist="$(. /etc/os-release && echo "$ID_LIKE")"
+			dist_version="$(. /etc/os-release && echo "$UBUNTU_CODENAME")"
+		;;
+
+		ubuntu)
 			if command_exists lsb_release; then
 				dist_version="$(lsb_release --codename | cut -f2)"
 			fi
