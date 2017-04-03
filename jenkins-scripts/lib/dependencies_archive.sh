@@ -69,18 +69,23 @@ fi
 
 # SDFORMAT related dependencies
 if [[ -z ${SDFORMAT_MAJOR_VERSION} ]]; then
-    SDFORMAT_MAJOR_VERSION=3
+    SDFORMAT_MAJOR_VERSION=5
 fi
 
-if [[ ${SDFORMAT_MAJOR_VERSION} -ge 3 ]]; then
+if [[ ${SDFORMAT_MAJOR_VERSION} -ge 5 ]]; then
+    # sdformat5 requires ignition-math3
+    SDFORMAT_BASE_DEPENDENCIES="${SDFORMAT_BASE_DEPENDENCIES}          \\
+                                libignition-math3-dev"
+elif [[ ${SDFORMAT_MAJOR_VERSION} -ge 3 ]]; then
     # sdformat3 requires ignition-math2
     SDFORMAT_BASE_DEPENDENCIES="${SDFORMAT_BASE_DEPENDENCIES}          \\
                                 libignition-math2-dev"
 fi
 
-# GAZEBO related dependencies
+# GAZEBO related dependencies. Default value points to the development version
+# of gazebo, it is being used by compile from source tutorial
 if [[ -z ${GAZEBO_MAJOR_VERSION} ]]; then
-    GAZEBO_MAJOR_VERSION=7
+    GAZEBO_MAJOR_VERSION=8
 fi
 
 # Need to explicit define to use old sdformat package
@@ -90,6 +95,8 @@ fi
 
 if ${USE_OLD_SDFORMAT}; then
     sdformat_pkg="sdformat"
+elif [[ ${GAZEBO_MAJOR_VERSION} -ge 8 ]]; then
+    sdformat_pkg="libsdformat5-dev"
 elif [[ ${GAZEBO_MAJOR_VERSION} -ge 7 ]]; then
     sdformat_pkg="libsdformat4-dev"
 elif [[ ${GAZEBO_MAJOR_VERSION} -ge 6 ]]; then
@@ -125,8 +132,22 @@ if [[ ${GAZEBO_MAJOR_VERSION} -le 7 ]]; then
   gazebo_qt_dependencies="libqt4-dev \\
                           libqtwebkit-dev"
 else
-  gazebo_qt_dependencies="libqt4-dev \\
-                          qtbase5-dev"
+  if [[ ${DISTRO} == 'trusty' ]]; then
+    gazebo_qt_dependencies="libqt4-dev \\
+                            libqwt-dev \\
+                            qtbase5-dev"
+  else
+    # After gazebo8 is released, these two lines should be all that remain
+    gazebo_qt_dependencies="qtbase5-dev \\
+                            libqwt-qt5-dev"
+    # Install qt4 as well for gazebo8 until its release
+    # 20170125 release date of gazebo8
+    if [[ $(date +%Y%m%d) -le 20170125 ]]; then
+      gazebo_qt_dependencies="${gazebo_qt_dependencies} \\
+                              libqt4-dev \\
+                              libqwt-dev"
+    fi
+  fi
 fi
 
 GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="libfreeimage-dev     \\
@@ -154,21 +175,23 @@ GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="libfreeimage-dev     \\
                           ${bullet_pkg}                    \\
                           libsimbody-dev                   \\
                           ${dart_pkg}"
-                   
-if [[ ${GAZEBO_MAJOR_VERSION} -ge 6 ]]; then
+
+if [[ ${GAZEBO_MAJOR_VERSION} -eq 6 ]]; then
     GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="${GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT} \\
                                          libignition-math2-dev"
 fi
 
-if [[ ${GAZEBO_MAJOR_VERSION} -ge 7 ]]; then
+if [[ ${GAZEBO_MAJOR_VERSION} -eq 7 ]]; then
     GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="${GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT} \\
                               libignition-transport-dev"
 fi
 
 if [[ ${GAZEBO_MAJOR_VERSION} -ge 8 ]]; then
     GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="${GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT} \\
-                                         libignition-msgs-dev \\
-                                         libqwt-dev"
+                                         libignition-transport2-dev \\
+                                         libignition-transport3-dev \\
+                                         libignition-math3-dev \\
+                                         libignition-msgs-dev"
 fi
 
 # libtinyxml2-dev is not on precise
@@ -185,6 +208,7 @@ GAZEBO_EXTRA_DEPENDENCIES="libavformat-dev  \\
                            libavcodec-dev   \\
                            libgraphviz-dev  \\
                            libswscale-dev   \\
+                           libavdevice-dev   \\
                            ruby-ronn"
 
 # Player was removed starting from xenial
@@ -270,6 +294,7 @@ else
                             ros-${ROS_DISTRO}-robot-model                       \\
                             ros-${ROS_DISTRO}-robot-state-publisher             \\
                             ros-${ROS_DISTRO}-control-toolbox                   \\
+                            libtinyxml2-dev                                     \\
                             ${_GZ_ROS_PACKAGES}"
 
   if [[ $ROS_DISTRO == 'hydro' ]]; then
@@ -315,6 +340,7 @@ else
   #
   ROS_GAZEBO_PKGS_DEPENDENCIES="${ROS_CATKIN_BASE}                        \\
                                 libtinyxml-dev                            \\
+                                ros-${ROS_DISTRO}-ros-base                \\
                                 ros-${ROS_DISTRO}-catkin                  \\
                                 ros-${ROS_DISTRO}-pluginlib               \\
                                 ros-${ROS_DISTRO}-roscpp                  \\
@@ -406,9 +432,14 @@ IGN_COMMON_DEPENDENCIES="pkg-config            \\
                          python                \\
                          ruby-ronn             \\
                          uuid-dev              \\
-                         libignition-math2-dev \\
+                         libignition-math3-dev \\
                          libfreeimage-dev      \\
                          libgts-dev            \\
+                         libavformat-dev       \\
+                         libavcodec-dev        \\
+                         libswscale-dev        \\
+                         libavutil-dev         \\
+                         libavdevice-dev       \\
                          uuid-dev"
 
 #

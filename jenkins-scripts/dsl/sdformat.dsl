@@ -1,8 +1,8 @@
 import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
-def sdformat_supported_branches = [ 'sdformat2', 'sdformat3', 'sdformat4' ]
-def nightly_sdformat_branch = [ 'sdformat4' ]
+def sdformat_supported_branches = [ 'sdformat4', 'sdformat5' ]
+def nightly_sdformat_branch = [ 'sdformat5' ]
 
 // Main platform using for quick CI
 def ci_distro               = Globals.get_ci_distro()
@@ -26,9 +26,6 @@ String get_sdformat_branch_name(String full_branch_name)
 {
   String sdf_branch = full_branch_name.replace("ormat",'')
 
-  if ("${full_branch_name}" == 'sdformat2')
-     sdf_branch = 'sdf_2.3'
-
   return sdf_branch
 }
 
@@ -39,16 +36,10 @@ abi_distro.each { distro ->
     abi_job_name = "sdformat-abichecker-any_to_any-${distro}-${arch}"
     def abi_job = job(abi_job_name)
     OSRFLinuxABI.create(abi_job)
+    OSRFBitbucketHg.create(abi_job, "https://bitbucket.org/osrf/sdformat")
+
     abi_job.with
     {
-      scm
-      {
-        hg("http://bitbucket.org/osrf/sdformat") {
-          branch('default')
-          subdirectory("sdformat")
-        }
-      }
-
       steps {
         shell("""\
               #!/bin/bash -xe
@@ -70,15 +61,10 @@ ci_distro.each { distro ->
     // 1. Create the default ci jobs
     def sdformat_ci_job = job("sdformat-ci-default-${distro}-${arch}")
     OSRFLinuxCompilation.create(sdformat_ci_job)
+    OSRFBitbucketHg.create(sdformat_ci_job, "https://bitbucket.org/osrf/sdformat")
+
     sdformat_ci_job.with
     {
-      scm {
-        hg("http://bitbucket.org/osrf/sdformat") {
-          branch('default')
-          subdirectory("sdformat")
-        }
-      }
-
       triggers {
       	scm('*/5 * * * *')
       }
@@ -96,7 +82,7 @@ ci_distro.each { distro ->
 
     // --------------------------------------------------------------
     // 2. Create the any job
-    String sdf_repo = "http://bitbucket.org/osrf/sdformat"
+    String sdf_repo = "https://bitbucket.org/osrf/sdformat"
 
     def sdformat_ci_any_job = job(ci_build_any_job_name_linux)
     OSRFLinuxCompilationAny.create(sdformat_ci_any_job, sdf_repo)
@@ -143,15 +129,10 @@ other_supported_distros.each { distro ->
     // ci_default job for the rest of arches / scm@daily
     def sdformat_ci_job = job("sdformat-ci-default-${distro}-${arch}")
     OSRFLinuxCompilation.create(sdformat_ci_job)
+    OSRFBitbucketHg.create(sdformat_ci_job, "https://bitbucket.org/osrf/sdformat")
+
     sdformat_ci_job.with
     {
-      scm {
-        hg("http://bitbucket.org/osrf/sdformat") {
-          branch('default')
-          subdirectory("sdformat")
-        }
-      }
-
       triggers {
         scm('@daily')
       }
@@ -176,16 +157,11 @@ sdformat_supported_branches.each { branch ->
       // ci_default job for the rest of arches / scm@daily
       def sdformat_ci_job = job("sdformat-ci-${branch}-${distro}-${arch}")
       OSRFLinuxCompilation.create(sdformat_ci_job)
+      OSRFBitbucketHg.create(sdformat_ci_job,
+                             "https://bitbucket.org/osrf/sdformat",
+                             get_sdformat_branch_name(branch))
       sdformat_ci_job.with
       {
-        scm
-        {
-          // The usual form using branch in the clousure does not work
-          hg("http://bitbucket.org/osrf/sdformat",
-             get_sdformat_branch_name(branch),
-             { node -> node / subdir << "sdformat" })
-        }
-
         triggers {
           scm('@daily')
         }
@@ -210,16 +186,10 @@ ci_distro.each { distro ->
   experimental_arches.each { arch ->
     def sdformat_ci_job = job("sdformat-ci-default-${distro}-${arch}")
     OSRFLinuxCompilation.create(sdformat_ci_job)
+    OSRFBitbucketHg.create(sdformat_ci_job, "https://bitbucket.org/osrf/sdformat")
+
     sdformat_ci_job.with
     {
-      scm
-      {
-        hg("http://bitbucket.org/osrf/sdformat") {
-          branch('default')
-          subdirectory("sdformat")
-        }
-      }
-
       triggers {
         scm('@weekly')
       }
@@ -239,7 +209,13 @@ ci_distro.each { distro ->
 
 // INSTALL LINUX -DEV PACKAGES ALL PLATFORMS @ CRON/DAILY
 sdformat_supported_branches.each { branch ->
-  ci_distro.each { distro ->
+  // select distro for testing the different packages
+  if (branch == 'sdformat3')
+    testing_distro = [ 'trusty' ]
+  else
+    testing_distro = ci_distro
+
+  testing_distro.each { distro ->
     supported_arches.each { arch ->
       // --------------------------------------------------------------
       def install_default_job = job("sdformat-install-${branch}_pkg-${distro}-${arch}")
@@ -274,17 +250,11 @@ ci_distro.each { distro ->
   supported_arches.each { arch ->
     def performance_job = job("sdformat-performance-default-${distro}-${arch}")
     OSRFLinuxPerformance.create(performance_job)
+    OSRFBitbucketHg.create(performance_job, "https://bitbucket.org/osrf/sdformat")
+
     performance_job.with
     {
       label "${performance_box}"
-
-      scm
-      {
-        hg("http://bitbucket.org/osrf/sdformat") {
-          branch('default')
-          subdirectory("sdformat")
-        }
-      }
 
       triggers {
         scm('@daily')
@@ -330,7 +300,7 @@ all_debbuild_branches.each { branch ->
 String ci_build_any_job_name_brew = "sdformat-ci-pr_any-homebrew-amd64"
 def sdformat_brew_ci_any_job = job(ci_build_any_job_name_brew)
 OSRFBrewCompilationAny.create(sdformat_brew_ci_any_job,
-                              "http://bitbucket.org/osrf/sdformat")
+                              "https://bitbucket.org/osrf/sdformat")
 sdformat_brew_ci_any_job.with
 {
     steps {
@@ -343,20 +313,16 @@ sdformat_brew_ci_any_job.with
 }
 
 // 2. default in all branches @SCM/daily
-// No sdformat2 for brew
-all_branches = sdformat_supported_branches + 'default' - 'sdformat2'
+all_branches = sdformat_supported_branches + 'default'
 all_branches.each { branch ->
   def sdformat_brew_ci_job = job("sdformat-ci-${branch}-homebrew-amd64")
   OSRFBrewCompilation.create(sdformat_brew_ci_job)
-
+  OSRFBitbucketHg.create(sdformat_brew_ci_job,
+                         "https://bitbucket.org/osrf/sdformat",
+                         get_sdformat_branch_name(branch))
+ 
   sdformat_brew_ci_job.with
   {
-      scm {
-        hg("http://bitbucket.org/osrf/sdformat",
-           get_sdformat_branch_name(branch),
-           { node -> node / subdir << "sdformat" })
-      }
-
       triggers {
         scm('@daily')
       }
@@ -378,7 +344,7 @@ all_branches.each { branch ->
   String ci_build_any_job_name_win7 = "sdformat-ci-pr_any-windows7-amd64"
   def sdformat_win_ci_any_job = job(ci_build_any_job_name_win7)
   OSRFWinCompilationAny.create(sdformat_win_ci_any_job,
-                                "http://bitbucket.org/osrf/sdformat")
+                                "https://bitbucket.org/osrf/sdformat")
   sdformat_win_ci_any_job.with
   {
       steps {
@@ -393,22 +359,24 @@ all_branches = sdformat_supported_branches + 'default'
 all_branches.each { branch ->
   def sdformat_win_ci_job = job("sdformat-ci-${branch}-windows7-amd64")
   OSRFWinCompilation.create(sdformat_win_ci_job)
-
+  OSRFBitbucketHg.create(sdformat_win_ci_job,
+                         "https://bitbucket.org/osrf/sdformat",
+                         get_sdformat_branch_name(branch))
   sdformat_win_ci_job.with
   {
-      scm
-      {
-        hg("http://bitbucket.org/osrf/sdformat",
-           'default',
-           { node -> node / subdir << "sdformat" })
-      }
-
       triggers {
         scm('@daily')
       }
 
+      if (branch == 'sdformat4')
+        ign_math_v="2"
+      else
+        ign_math_v="3"
+
       steps {
         batchFile("""\
+              set USE_IGNITION_ZIP=FALSE
+              set IGNMATH_BRANCH=ign-math${ign_math_v}
               call "./scripts/jenkins-scripts/sdformat-default-devel-windows-amd64.bat"
               """.stripIndent())
       }
@@ -416,7 +384,7 @@ all_branches.each { branch ->
 }
 
 // Create the main CI work flow job
-def sdformat_ci_main = workflowJob("sdformat-ci-pr_any")
+def sdformat_ci_main = pipelineJob("sdformat-ci-pr_any")
 OSRFCIWorkFlowMultiAny.create(sdformat_ci_main,
                                     [ci_build_any_job_name_linux,
                                      ci_build_any_job_name_brew,

@@ -4,6 +4,7 @@ class Globals
 {
    // Notifications for email ext plugin
    static default_emails = '$DEFAULT_RECIPIENTS, scpeters@osrfoundation.org'
+   static build_cop_email = 'buildcop@osrfoundation.org'  
    static extra_emails   = ''
 
    static rtools_description = true
@@ -40,7 +41,7 @@ class Globals
       if (extra_emails != '')
       {
         return default_emails + ', ' + extra_emails
-     }
+      }
 
       return default_emails
    }
@@ -54,7 +55,7 @@ class Globals
    // Main CI platform
    static ArrayList get_ci_distro()
    {
-    return [ 'trusty' ]
+    return [ 'xenial' ]
    }
 
    static ArrayList get_abi_distro()
@@ -69,7 +70,7 @@ class Globals
 
    static ArrayList get_other_supported_distros()
    {
-     return [ 'wily', 'xenial' ]
+     return [ 'trusty', 'yakkety' ]
    }
 
    static ArrayList get_supported_arches()

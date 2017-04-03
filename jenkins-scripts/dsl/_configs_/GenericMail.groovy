@@ -11,8 +11,9 @@ class GenericMail
 
      ${BUILD_FAILURE_ANALYZER, includeTitle=true, includeIndications=true, useHtmlFormat=false}
 
-     Full log: $BUILD_URL/consoleFull
-     Retry   : $BUILD_URL/retry
+     Build summary: $BUILD_URL
+     Full log     : $BUILD_URL/consoleFull
+     Retry        : $BUILD_URL/retry
      '''.stripIndent()
   }
 
@@ -136,11 +137,13 @@ class GenericMail
     return("""
            // 3. Filter mail to get only OSRF
            recipients =
-              msg.getRecipients(javax.mail.Message.RecipientType.TO)
+              msg.getAllRecipients()
            filtered =
               recipients.findAll { addr -> addr.toString().contains('@osrfoundation.org') }
            msg.setRecipients(javax.mail.Message.RecipientType.TO,
                              filtered as javax.mail.Address[])
+           logger.println("Final list of recipients after filtering:");
+           logger.println(recipients);
 
            // always need to be the last line to cancel email when needed
            cancel = final_cancel_answer
