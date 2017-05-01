@@ -19,8 +19,7 @@ Job create_common_compilation(String job_name,
 {
    def comp_job = job(job_name)
 
-   OSRFLinuxCompilationAnyGitHub.create(comp_job,
-              Globals.get_ros_distros_by_ubuntu_distro(ubuntu_distro))
+   OSRFLinuxCompilationAnyGitHub.create(comp_job, [ "${ros_distro}" ])
 
    include_common_params(comp_job,
                          ubuntu_distro,
@@ -42,6 +41,7 @@ void include_common_params(Job gazebo_ros_pkgs_job,
       if (gz_version != "default") {
         use_non_official_gazebo_package = """\
                                           export GAZEBO_VERSION_FOR_ROS="${gz_version}"
+                                          export USE_GZ_VERSION_ROSDEP=true
                                           export OSRF_REPOS_TO_USE="stable"
                                           """.stripIndent()
       }
@@ -124,7 +124,7 @@ ros_distros.each { ros_distro ->
       if (! (gz_version in Globals.gz_version_by_rosdistro[ros_distro]))
       {
         // --------------------------------------------------------------
-        // 3. Testing packages jobs install_pkg
+        // 1.2 Testing packages jobs install_pkg
         def install_default_job = job("ros_gazebo${gz_version}_pkgs-install_pkg_${suffix_triplet}")
         OSRFLinuxInstall.create(install_default_job)
         include_common_params(install_default_job,
@@ -137,7 +137,16 @@ ros_distros.each { ros_distro ->
           triggers {
             cron('@daily')
           }
-        } // end of with
+        } 
+
+        // --------------------------------------------------------------
+        // 2.2 Extra ci pr-any jobs
+        def ci_pr_job_name = "ros_gazebo${gz_version}_pkgs-ci-pr_any_${suffix_triplet}"
+        Job ci_pr_job = create_common_compilation(ci_pr_job_name,
+                                            ubuntu_distro,
+                                            ros_distro,
+                                            gz_version,
+                                            "gazebo_ros_pkgs-compilation")
       }
     } // end of gazebo_versions
 
