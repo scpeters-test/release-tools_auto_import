@@ -2,9 +2,9 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'math', 'msgs', 'common', 'rndf', 'gui' ]
+ignition_software           = [ 'transport', 'math', 'msgs', 'common', 'rndf', 'gui' , 'sensors']
 ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'msgs1' ]
-ignition_gpu                = [ 'gui' ]
+ignition_gpu                = [ 'gui', 'sensors' ]
 // no registered branches in ignition_branches means only series 0 or 1
 ignition_branches           = [ transport : [ '3' ],
                                 math      : [ '2', '3' ],
@@ -211,6 +211,9 @@ ignition_software.each { ign_sw ->
           if (("${ign_sw}" == "msgs") && ("${distro}" == "trusty"))
             disabled()
           if (("${ign_sw}" == "common") && ("${distro}" == "trusty"))
+            disabled()
+          // Sensors does not support trusty because CMake version is too old
+          if (("${ign_sw}" == "sensors") && ("${distro}" == "trusty"))
             disabled()
 
           steps {
