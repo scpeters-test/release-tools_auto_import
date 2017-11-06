@@ -2,9 +2,9 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui' ]
+ignition_software           = [ 'transport', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors']
 ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'msgs1' ]
-ignition_gpu                = [ 'gui' ]
+ignition_gpu                = [ 'gui', 'sensors' ]
 // no registered branches in ignition_branches means only series 0 or 1
 ignition_branches           = [ transport : [ '3' ],
                                 math      : [ '2', '3' ],
@@ -164,29 +164,22 @@ ignition_software.each { ign_sw ->
 
         install_default_job.with
         {
-          triggers {
-            cron('@daily')
-          }
+           triggers {
+             cron('@daily')
+           }
 
-          // only a few release branches support trusty anymore
-          if (("${distro}" == "trusty") && !(
-              (("${ign_sw}" == "math") && ("${major_version}" == "2")) ||
-              (("${ign_sw}" == "math") && ("${major_version}" == "3")) ||
-              (("${ign_sw}" == "transport") && ("${major_version}" == "3"))))
-            disabled()
+           def dev_package = "libignition-${ign_sw}${major_version}-dev"
 
-          def dev_package = "libignition-${ign_sw}${major_version}-dev"
+           steps {
+            shell("""\
+                  #!/bin/bash -xe
 
-          steps {
-           shell("""\
-                 #!/bin/bash -xe
-
-                 export DISTRO=${distro}
-                 export ARCH=${arch}
-                 export INSTALL_JOB_PKG=${dev_package}
-                 export INSTALL_JOB_REPOS=stable
-                 /bin/bash -x ./scripts/jenkins-scripts/docker/generic-install-test-job.bash
-                 """.stripIndent())
+                  export DISTRO=${distro}
+                  export ARCH=${arch}
+                  export INSTALL_JOB_PKG=${dev_package}
+                  export INSTALL_JOB_REPOS=stable
+                  /bin/bash -x ./scripts/jenkins-scripts/docker/generic-install-test-job.bash
+                  """.stripIndent())
           }
         }
       }
@@ -213,11 +206,11 @@ ignition_software.each { ign_sw ->
             scm('@daily')
           }
 
-          // only a few release branches support trusty anymore
-          if (("${distro}" == "trusty") && !(
-              ("${branch}" == "ign-math2") ||
-              ("${branch}" == "ign-math3") ||
-              ("${branch}" == "ign-transport3")))
+          // msgs amd common does not work on trusty
+          // https://bitbucket.org/ignitionrobotics/ign-msgs/issues/8
+          if (("${ign_sw}" == "msgs") && ("${distro}" == "trusty"))
+            disabled()
+          if (("${ign_sw}" == "common") && ("${distro}" == "trusty"))
             disabled()
 
           steps {
