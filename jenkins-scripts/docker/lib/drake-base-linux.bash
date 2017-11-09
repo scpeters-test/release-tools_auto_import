@@ -1,5 +1,8 @@
 #!/bin/bash -x
 
+#stop on error
+set -e
+
 # Drake can not work with ccache
 export ENABLE_CCACHE=false
 
@@ -20,8 +23,6 @@ ${DRAKE_BAZEL_INSTALL}
 echo '# BEGIN SECTION: install Drake dependencies'
 INSTALL_PREREQS_DIR="${WORKSPACE}/repo/setup/ubuntu/16.04"
 INSTALL_PREREQS_FILE="\$INSTALL_PREREQS_DIR/install_prereqs.sh"
-# Remove sudo command from ccache
-sed -i -e 's:sudo : :g' \$INSTALL_PREREQS_DIR/ccache-bazel-wrapper-mkdeb.sh || true
 # Remove last cmake dependencies
 sed -i -e '/# TODO\(jamiesnape\).*/,\$d' \$INSTALL_PREREQS_FILE
 # Install automatically all apt commands
@@ -52,7 +53,7 @@ git clone https://github.com/RobotLocomotion/drake-shambhala
 cd drake-shambhala/drake_cmake_installed
 mkdir build
 cd build
-cmake ..
+cmake -Ddrake_DIR=/opt/drake/lib/cmake/drake ..
 make -j${MAKE_JOBS}
 cd src/particles
 ./uniformly_accelerated_particle_demo -simulation_time 5
