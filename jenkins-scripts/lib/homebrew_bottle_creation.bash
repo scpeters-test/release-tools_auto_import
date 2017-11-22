@@ -8,6 +8,9 @@ export PATH="/usr/local/bin:$PATH"
 
 PKG_DIR=${WORKSPACE}/pkgs
 
+# Setup git user and mail
+. ${SCRIPT_LIBDIR}/_homebrew_git_config.bash
+
 echo '# BEGIN SECTION: check variables'
 if [ -z "${PULL_REQUEST_URL}" ]; then
     echo PULL_REQUEST_URL not specified
