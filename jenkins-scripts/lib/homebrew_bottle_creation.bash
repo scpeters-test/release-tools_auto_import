@@ -8,9 +8,6 @@ export PATH="/usr/local/bin:$PATH"
 
 PKG_DIR=${WORKSPACE}/pkgs
 
-# Setup git user and mail
-. ${SCRIPT_LIBDIR}/_homebrew_git_config.bash
-
 echo '# BEGIN SECTION: check variables'
 if [ -z "${PULL_REQUEST_URL}" ]; then
     echo PULL_REQUEST_URL not specified
@@ -28,8 +25,12 @@ echo '# BEGIN SECTION: run test-bot'
 # mercurial to keep the slave working
 export HOMEBREW_DEVELOPER=1
 brew tap homebrew/test-bot
-git -C $(brew --repo)/Library/Taps/homebrew/homebrew-test-bot \
-    pull ${TEST_BOT_REPO} ${TEST_BOT_BRANCH}
+
+# Setup git user and mail
+GIT="git -C $(brew --repo)/Library/Taps/homebrew/homebrew-test-bot"
+. ${SCRIPT_LIBDIR}/_homebrew_git_config.bash
+
+${GIT} pull ${TEST_BOT_REPO} ${TEST_BOT_BRANCH}
 brew test-bot --tap=osrf/simulation \
               --ci-pr ${PULL_REQUEST_URL} \
             || { brew install hg; exit -1; }
