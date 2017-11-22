@@ -27,10 +27,10 @@ export HOMEBREW_DEVELOPER=1
 brew tap homebrew/test-bot
 
 # Setup git user and mail
-GIT="git -C $(brew --repo)/Library/Taps/homebrew/homebrew-test-bot"
 . ${SCRIPT_LIBDIR}/_homebrew_git_config.bash
 
-${GIT} pull ${TEST_BOT_REPO} ${TEST_BOT_BRANCH}
+git -C $(brew --repo)/Library/Taps/homebrew/homebrew-test-bot \
+    pull ${TEST_BOT_REPO} ${TEST_BOT_BRANCH}
 brew test-bot --tap=osrf/simulation \
               --ci-pr ${PULL_REQUEST_URL} \
             || { brew install hg; exit -1; }
