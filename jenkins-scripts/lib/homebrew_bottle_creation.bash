@@ -27,6 +27,8 @@ export HOMEBREW_DEVELOPER=1
 brew tap homebrew/test-bot
 git -C $(brew --repo)/Library/Taps/homebrew/homebrew-test-bot \
     pull ${TEST_BOT_REPO} ${TEST_BOT_BRANCH}
+whoami
+brew doctor || true
 brew test-bot --tap=osrf/simulation \
               --ci-pr ${PULL_REQUEST_URL} \
               --debug --verbose \
