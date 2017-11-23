@@ -31,6 +31,8 @@ whoami
 brew doctor || true
 brew test-bot --tap=osrf/simulation \
               --ci-pr ${PULL_REQUEST_URL} \
+              --git-name="${GIT_AUTHOR_NAME}" \
+              --git-email="${GIT_AUTHOR_EMAIL}" \
               --debug --verbose \
             || { brew install hg; exit -1; }
 brew install hg
