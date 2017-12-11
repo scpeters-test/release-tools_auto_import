@@ -2,10 +2,9 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors']
-ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'msgs1' ]
-ignition_gpu                = [ 'gui', 'sensors' ]
-// no registered branches in ignition_branches means only series 0 or 1
+ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors']
+ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'msgs0' ]
+ignition_gpu                = [ 'gui', 'sensors' ]// no registered branches in ignition_branches means only series 0 or 1
 ignition_branches           = [ transport : [ '3' ],
                                 math      : [ '2', '3' ],
                                 msgs      : [ '1']]
@@ -154,15 +153,12 @@ ignition_software.each { ign_sw ->
 
 // INSTALL PACKAGE ALL PLATFORMS / DAILY
 ignition_software.each { ign_sw ->
+
+  // No packages for fuel-tools yet
+  if (ign_sw == 'fuel-tools')
+    return
+
   all_supported_distros.each { distro ->
-
-    // msgs amd common does not work on trusty
-    // https://bitbucket.org/ignitionrobotics/ign-msgs/issues/8
-    if (("${ign_sw}" == "msgs") && ("${distro}" == "trusty"))
-      return
-    if (("${ign_sw}" == "common") && ("${distro}" == "trusty"))
-      return
-
     supported_arches.each { arch ->
       supported_branches(ign_sw).each { major_version ->
 
@@ -183,6 +179,13 @@ ignition_software.each { ign_sw ->
           triggers {
             cron('@daily')
           }
+
+          // only a few release branches support trusty anymore
+          if (("${distro}" == "trusty") && !(
+              (("${ign_sw}" == "math") && ("${major_version}" == "2")) ||
+              (("${ign_sw}" == "math") && ("${major_version}" == "3")) ||
+              (("${ign_sw}" == "transport") && ("${major_version}" == "3"))))
+            disabled()
 
           def dev_package = "libignition-${ign_sw}${major_version}-dev"
 
@@ -326,6 +329,11 @@ ignition_software.each { ign_sw ->
 
 // 1. any
 ignition_software.each { ign_sw ->
+
+  // No windows for fuel-tools yet
+  if (ign_sw == 'fuel-tools')
+    return
+
   String ignition_win_ci_any_job_name = "ignition_${ign_sw}-ci-pr_any-windows7-amd64"
   def ignition_win_ci_any_job = job(ignition_win_ci_any_job_name)
   OSRFWinCompilationAny.create(ignition_win_ci_any_job,
