@@ -202,7 +202,7 @@ if ! ${GAZEBO_EXPERIMENTAL_BUILD}; then
       GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="${GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT} \\
                                            libignition-transport3-dev \\
                                            libignition-math3-dev \\
-                                           libignition-msgs-dev"
+                                           libignition-msgs0-dev"
   fi
 
   # libtinyxml2-dev is not on precise
@@ -468,7 +468,7 @@ IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
                             protobuf-compiler    \\
                             uuid-dev             \\
                             libzmq3-dev          \\
-                            libignition-msgs-dev \\
+                            libignition-msgs0-dev \\
                             libczmq-dev"
 
 IGN_COMMON_DEPENDENCIES="pkg-config            \\
@@ -488,9 +488,18 @@ IGN_COMMON_DEPENDENCIES="pkg-config            \\
                          uuid-dev"
 
 IGN_GUI_DEPENDENCIES="qtbase5-dev \\
+                      libignition-cmake-dev \\
+                      libignition-math4-dev \\
+                      libignition-msgs-dev \\
                       libtinyxml2-dev \\
                       libqwt-qt5-dev"
 
+IGN_RENDERING_DEPENDENCIES="${ogre_pkg}\\
+                            freeglut3-dev\\
+                            libx11-dev"
+
+IGN_SENSORS_DEPENDENCIES="libignition-math4-dev      \\
+                          libignition-transport3-dev"
 #
 # MENTOR2
 #
