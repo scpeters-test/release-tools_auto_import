@@ -297,21 +297,20 @@ ignition_software.each { ign_sw ->
   // add ci-pr_any to the list for CIWorkflow
   ci_pr_any_list[ign_sw] << ignition_brew_ci_any_job_name
 
-  // 2. default
+  // 2. default, release branches
   all_branches("${ign_sw}").each { branch ->
     def ignition_brew_ci_job = job("ignition_${ign_sw}-ci-${branch}-homebrew-amd64")
     OSRFBrewCompilation.create(ignition_brew_ci_job)
     OSRFBitbucketHg.create(ignition_brew_ci_job,
                               "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
                               "${branch}", "ign-${ign_sw}", "HomeBrew")
-
-    ign_sw_versioned = ign_sw + get_major_version_from_branch(branch, ign_sw)
-
     ignition_brew_ci_job.with
     {
         triggers {
           scm('@daily')
         }
+
+    	ign_sw_versioned = ign_sw + get_major_version_from_branch(branch, ign_sw)
 
         steps {
           shell("""\
@@ -351,24 +350,26 @@ ignition_software.each { ign_sw ->
   // add ci-pr_any to the list for CIWorkflow
   ci_pr_any_list[ign_sw] << ignition_win_ci_any_job_name
 
-  // 2. default
-  def ignition_win_ci_job = job("ignition_${ign_sw}-ci-default-windows7-amd64")
-  OSRFWinCompilation.create(ignition_win_ci_job)
-  OSRFBitbucketHg.create(ignition_win_ci_job,
-                            "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
-                            "default", "ign-${ign_sw}")
+  // 2. default, release branches
+  all_branches("${ign_sw}").each { branch ->
+    def ignition_win_ci_job = job("ignition_${ign_sw}-ci-${branch}-windows7-amd64")
+    OSRFWinCompilation.create(ignition_win_ci_job)
+    OSRFBitbucketHg.create(ignition_win_ci_job,
+                              "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
+                              "${branch}", "ign-${ign_sw}")
 
-  ignition_win_ci_job.with
-  {
-      triggers {
-        scm('@daily')
-      }
+    ignition_win_ci_job.with
+    {
+        triggers {
+          scm('@daily')
+        }
 
-      steps {
-        batchFile("""\
-              call "./scripts/jenkins-scripts/ign_${ign_sw}-default-devel-windows-amd64.bat"
-              """.stripIndent())
-      }
+        steps {
+          batchFile("""\
+                call "./scripts/jenkins-scripts/ign_${ign_sw}-default-devel-windows-amd64.bat"
+                """.stripIndent())
+        }
+    }
   }
 }
 
