@@ -2,13 +2,14 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors' ]
-ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'msgs0' ]
+ignition_software           = [ 'math' ]
+// ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors' ]
+ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'math4', 'msgs0' ]
 ignition_gpu                = [ 'gui', 'sensors' ]
 ignition_no_pkg_yet         = [ 'gui', 'fuel-tools', 'sensors' ]
 // no registered branches in ignition_branches means only series 0 or 1
 ignition_branches           = [ transport : [ '3' ],
-                                math      : [ '2', '3' ],
+                                math      : [ '2', '3', '4' ],
                                 msgs      : [ '1']]
 // Main platform using for quick CI
 def ci_distro               = Globals.get_ci_distro()
@@ -69,6 +70,14 @@ void include_gpu_label_if_needed(Job job, String ign_software_name)
         label "gpu-reliable"
     }
   }
+}
+
+String get_major_version_from_branch(String branch, String ign_software_name)
+{
+  if (branch == "default")
+    return ""
+
+  return branch.split(ign_software_name)[1]
 }
 
 // ABI Checker job
@@ -290,30 +299,35 @@ ignition_software.each { ign_sw ->
   ci_pr_any_list[ign_sw] << ignition_brew_ci_any_job_name
 
   // 2. default
-  def ignition_brew_ci_job = job("ignition_${ign_sw}-ci-default-homebrew-amd64")
-  OSRFBrewCompilation.create(ignition_brew_ci_job)
-  OSRFBitbucketHg.create(ignition_brew_ci_job,
-                            "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
-                            "default", "ign-${ign_sw}", "HomeBrew")
-  ignition_brew_ci_job.with
-  {
-      triggers {
-        scm('@daily')
-      }
+  all_branches("${ign_sw}").each { branch ->
+    def ignition_brew_ci_job = job("ignition_${ign_sw}-ci-${branch}-homebrew-amd64")
+    OSRFBrewCompilation.create(ignition_brew_ci_job)
+    OSRFBitbucketHg.create(ignition_brew_ci_job,
+                              "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
+                              "${branch}", "ign-${ign_sw}", "HomeBrew")
 
-      steps {
-        shell("""\
-              #!/bin/bash -xe
+    ign_sw_versioned = ign_sw + get_major_version_from_branch(branch, ign_sw)
 
-              export HOMEBREW_SCRIPT="./scripts/jenkins-scripts/ign_${ign_sw}-default-devel-homebrew-amd64.bash"
-              if [ -s "\$HOMEBREW_SCRIPT" ]
-              then
-                /bin/bash -xe "\$HOMEBREW_SCRIPT"
-              else
-                /bin/bash -xe "./scripts/jenkins-scripts/lib/project-default-devel-homebrew-amd64.bash" "ignition-${ign_sw}"
-              fi
-              """.stripIndent())
-      }
+    ignition_brew_ci_job.with
+    {
+        triggers {
+          scm('@daily')
+        }
+
+        steps {
+          shell("""\
+                #!/bin/bash -xe
+
+                export HOMEBREW_SCRIPT="./scripts/jenkins-scripts/ign_${ign_sw_versioned}-default-devel-homebrew-amd64.bash"
+                if [ -s "\$HOMEBREW_SCRIPT" ]
+                then
+                  /bin/bash -xe "\$HOMEBREW_SCRIPT"
+                else
+                  /bin/bash -xe "./scripts/jenkins-scripts/lib/project-default-devel-homebrew-amd64.bash" "ignition-${ign_sw_versioned}"
+                fi
+                """.stripIndent())
+        }
+    }
   }
 }
 
