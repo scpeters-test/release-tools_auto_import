@@ -202,7 +202,7 @@ if ! ${GAZEBO_EXPERIMENTAL_BUILD}; then
       GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT="${GAZEBO_BASE_DEPENDENCIES_NO_SDFORMAT} \\
                                            libignition-transport3-dev \\
                                            libignition-math3-dev \\
-                                           libignition-msgs-dev"
+                                           libignition-msgs0-dev"
   fi
 
   # libtinyxml2-dev is not on precise
@@ -460,6 +460,12 @@ if [[ ${DISTRO} != 'trusty' ]]; then
   IGN_MATH_DEPENDENCIES="libignition-cmake-dev"
 fi
 
+# IGN_TRANSPORT related dependencies. Default value points to the development
+# version
+if [[ -z ${IGN_TRANSPORT_MAJOR_VERSION} ]]; then
+    IGN_TRANSPORT_MAJOR_VERSION=5
+fi
+
 IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
                             python               \\
                             ruby-ronn            \\
@@ -468,8 +474,16 @@ IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
                             protobuf-compiler    \\
                             uuid-dev             \\
                             libzmq3-dev          \\
-                            libignition-msgs-dev \\
                             libczmq-dev"
+
+if [[ ${IGN_TRANSPORT_MAJOR_VERSION} -ge 4 ]]; then
+    IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_DEPENDENCIES} \\
+                                libignition-cmake-dev \\
+                                libignition-msgs-dev"
+else
+    IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_DEPENDENCIES} \\
+                                libignition-msgs0-dev"
+fi
 
 IGN_COMMON_DEPENDENCIES="pkg-config            \\
                          python                \\
@@ -488,9 +502,18 @@ IGN_COMMON_DEPENDENCIES="pkg-config            \\
                          uuid-dev"
 
 IGN_GUI_DEPENDENCIES="qtbase5-dev \\
+                      libignition-cmake-dev \\
+                      libignition-math4-dev \\
+                      libignition-msgs-dev \\
                       libtinyxml2-dev \\
                       libqwt-qt5-dev"
 
+IGN_RENDERING_DEPENDENCIES="${ogre_pkg}\\
+                            freeglut3-dev\\
+                            libx11-dev"
+
+IGN_SENSORS_DEPENDENCIES="libignition-math4-dev      \\
+                          libignition-transport3-dev"
 #
 # MENTOR2
 #
