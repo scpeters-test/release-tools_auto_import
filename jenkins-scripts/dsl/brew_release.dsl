@@ -3,7 +3,7 @@ import javaposse.jobdsl.dsl.Job
 
 Globals.default_emails = "jrivero@osrfoundation.org, scpeters@osrfoundation.org"
 
-brew_supported_distros         = [ "yosemite", "elcapitan", "sierra" ] 
+brew_supported_distros         = [ "elcapitan", "sierra", "highsierra" ]
 bottle_hash_updater_job_name   = 'generic-release-homebrew_pr_bottle_hash_updater'
 bottle_builder_job_name_prefix = 'generic-release-homebrew_bottle_builder'
 directory_for_bottles          = 'pkgs'
@@ -32,7 +32,7 @@ ArrayList get_all_bottle_builder_job_name(ArrayList supported_distros)
    supported_distros.each { distro ->
       all_job_names << get_bottle_builder_job_name(distro)
    }
-      
+
    return all_job_names
 }
 
@@ -244,7 +244,7 @@ bottle_job_hash_updater.with
     stringParam("PULL_REQUEST_URL", '',
                 'Pull request URL (osrf/homebrew-simulation) pointing to a pull request.')
   }
- 
+
   steps
   {
     systemGroovyCommand("""\
@@ -274,6 +274,20 @@ bottle_job_hash_updater.with
 
           /bin/bash -xe ./scripts/jenkins-scripts/lib/homebrew_bottle_pullrequest.bash
           """.stripIndent())
+  }
+
+  publishers
+  {
+    // Added the checker result parser (UNSTABLE if not compatible)
+    // IMPORTANT: the order of the steps here is important. Leave the configure
+    // block first.
+    configure { project ->
+      project / publishers << 'hudson.plugins.logparser.LogParserPublisher' {
+        unstableOnWarning true
+        failBuildOnError false
+        parsingRulesPath('/var/lib/jenkins/logparser_warn_on_mark_unstable')
+      }
+    } // end of configure
   }
 }
 
