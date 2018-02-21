@@ -488,9 +488,15 @@ IGN_TRANSPORT_DEPENDENCIES="pkg-config           \\
                             libzmq3-dev          \\
                             libczmq-dev"
 
-if [[ ${IGN_TRANSPORT_MAJOR_VERSION} -ge 4 ]]; then
+if [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 4 ]]; then
     IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_DEPENDENCIES} \\
                                 libignition-cmake-dev \\
+                                libignition-msgs-dev"
+elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -ge 5 ]]; then
+    IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_DEPENDENCIES} \\
+                                libignition-cmake-dev \\
+                                libsqlite3-dev \\
+                                ruby-ffi \\
                                 libignition-msgs-dev"
 else
     IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_DEPENDENCIES} \\
@@ -536,7 +542,8 @@ IGN_RENDERING_DEPENDENCIES="${ogre_pkg}\\
 IGN_SENSORS_DEPENDENCIES="libignition-common-dev     \\
                           libignition-math4-dev      \\
                           libignition-msgs-dev       \\
-                          libignition-transport3-dev"
+                          libignition-transport4-dev \\
+                          libsdformat6-dev"
 
 IGN_RNDF_DEPENDENCIES="libignition-cmake-dev \\
                        libignition-math4-dev"
