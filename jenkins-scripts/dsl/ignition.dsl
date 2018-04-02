@@ -2,11 +2,11 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors' ]
+ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'rendering', 'sensors' ]
 ignition_debbuild           = ignition_software + [ 'transport2', 'transport3',
 'math3', 'math4', 'math5', 'msgs0' ]
-ignition_gpu                = [ 'gui', 'sensors' ]
-ignition_no_pkg_yet         = [ 'gui', 'sensors' ]
+ignition_gpu                = [ 'gui', 'rendering', 'sensors' ]
+ignition_no_pkg_yet         = [ 'gui', 'rendering', 'sensors' ]
 // no branches in ignition_branches means no released branches
 ignition_branches           = [ 'common'     : [ '1' ],
                                 'fuel-tools' : [ '1' ],
