@@ -3,7 +3,8 @@ import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
 ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors' ]
-ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'math4', 'msgs0' ]
+ignition_debbuild           = ignition_software + [ 'transport2', 'transport3',
+'math3', 'math4', 'math5', 'msgs0' ]
 ignition_gpu                = [ 'gui', 'sensors' ]
 ignition_no_pkg_yet         = [ 'gui', 'sensors' ]
 // no branches in ignition_branches means no released branches
@@ -85,7 +86,7 @@ ignition_software.each { ign_sw ->
       OSRFLinuxABI.create(abi_job)
       OSRFBitbucketHg.create(abi_job,
                             "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
-                            "default", checkout_subdir)
+                            '${TARGET_BRANCH}', checkout_subdir)
       abi_job.with
       {
         steps {
