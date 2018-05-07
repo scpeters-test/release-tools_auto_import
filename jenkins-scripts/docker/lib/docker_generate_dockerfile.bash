@@ -174,7 +174,7 @@ fi
 if [[ $ARCH == 'arm64' ]]; then
 cat >> Dockerfile << DELIM_SYSCAL_ARM64
 # Workaround for problem with syscall 277 in man-db
-echo 'apt::sandbox::seccomp "false";' > /etc/apt/apt.conf.d/999seccomp
+RUN echo 'apt::sandbox::seccomp "false";' > /etc/apt/apt.conf.d/999seccomp
 RUN apt-get update && \\
     apt-get install -y man-db
 DELIM_SYSCAL_ARM64
