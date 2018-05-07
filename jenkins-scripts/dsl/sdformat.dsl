@@ -125,6 +125,10 @@ ci_distro.each { distro ->
 
 // OTHER CI SUPPORTED JOBS (default branch) @ SCM/DAILY
 other_supported_distros.each { distro ->
+  // default doesn't support trusty anymore
+  if ("${distro}" == "trusty")
+    return
+
   supported_arches.each { arch ->
     // ci_default job for the rest of arches / scm@daily
     def sdformat_ci_job = job("sdformat-ci-default-${distro}-${arch}")
