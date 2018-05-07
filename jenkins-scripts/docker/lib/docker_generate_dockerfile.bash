@@ -176,7 +176,9 @@ cat >> Dockerfile << DELIM_SYSCAL_ARM64
 # Workaround for problem with syscall 277 in man-db
 RUN echo 'apt::sandbox::seccomp "false";' > /etc/apt/apt.conf.d/999seccomp
 RUN apt-get update && \\
-    apt-get install -y man-db
+    apt-get build-dep -y man-db
+RUN wget https://build.osrfoundation.org/job/generic_backport-debbuilder/40/artifact/pkgs/man-db_2.7.6.1-2%7Eubuntu16.04.1_amd64.deb
+RUN dpkg -i man-db*.deb
 DELIM_SYSCAL_ARM64
 fi
 
