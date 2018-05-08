@@ -245,6 +245,7 @@ RUN echo "Invalidating cache $(( ( RANDOM % 100000 )  + 1 ))" \
 RUN mkdir -p ${WORKSPACE}
 DELIM_DOCKER3
 
+if [[ $ARCH != 'arm64' ]]; then
 cat >> Dockerfile << DELIM_DOCKER_SQUID
 # If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
 # By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
@@ -254,6 +255,7 @@ RUN echo "HEAD /" | nc \$(cat /tmp/host_ip.txt) 8000 | grep squid-deb-proxy \
   && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
   || echo "No squid-deb-proxy detected on docker host"
 DELIM_DOCKER_SQUID
+fi
 
 if [[ -n ${SOFTWARE_DIR} ]]; then
 cat >> Dockerfile << DELIM_DOCKER4
