@@ -183,7 +183,7 @@ RUN dpkg -i apt*.deb
 RUN wget https://launchpad.net/ubuntu/+source/apt/1.6.1/+build/14780697/+files/apt-utils_1.6.1_arm64.deb
 RUN dpkg -i apt-utils*.deb
 RUN apt-get install -f
-RUN echo 'apt::sandbox::seccomp "false";' > /etc/apt/apt.conf.d/999seccomp
+RUN echo 'apt::sandbox::seccomp "true";' > /etc/apt/apt.conf.d/999seccomp
 RUN apt-get update && \\
     apt-get install -y man-db
 DELIM_SYSCAL_ARM64
