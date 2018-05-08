@@ -176,8 +176,6 @@ cat >> Dockerfile << DELIM_SYSCAL_ARM64
 # Workaround for problem with syscall 277 in man-db
 RUN apt-get update && \\
     apt-get install -y libseccomp-dev libseccomp2
-RUN apt-get update && \\
-    apt-get install -y man-db
 RUN curl https://launchpad.net/ubuntu/+source/apt/1.6.1/+build/14780697/+files/libapt-pkg5.0_1.6.1_arm64.deb --output libapt.deb
 RUN dpkg -i libapt.deb
 RUN curl https://launchpad.net/ubuntu/+source/apt/1.6.1/+build/14780697/+files/apt_1.6.1_arm64.deb --output apt.deb
