@@ -175,8 +175,6 @@ if [[ $ARCH == 'arm64' ]]; then
 cat >> Dockerfile << DELIM_SYSCAL_ARM64
 # Workaround for problem with syscall 277 in man-db
 ENV MAN_DISABLE_SECCOMP 1
-RUN apt-get update && \\
-    apt-get install -y libseccomp-dev libseccomp2 wget libzstd1
 RUN echo 'apt::sandbox::seccomp "true";' > /etc/apt/apt.conf.d/999seccomp
 RUN echo 'DPkg::Post-Invoke { "if [ -x /usr/bin/debsums ]; then /usr/bin/debsums --generate=nocheck -sp /var/cache/apt/archives; fi"; };' > /etc/apt/apt.conf.d/90debsums 
 RUN apt-get update && \\
