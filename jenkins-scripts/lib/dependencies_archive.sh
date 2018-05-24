@@ -571,11 +571,11 @@ fi
 
 IGN_GUI_DEPENDENCIES="qtbase5-dev \\
                       libignition-cmake1-dev \\
-                      libignition-math4-dev \\
+                      libignition-math5-dev \\
                       libignition-tools-dev \\
-                      libignition-transport4-dev \\
-                      libignition-msgs-dev \\
-                      libignition-common-dev \\
+                      libignition-transport5-dev \\
+                      libignition-msgs2-dev \\
+                      libignition-common2-dev \\
                       libtinyxml2-dev \\
                       libqwt-qt5-dev"
 
@@ -592,8 +592,8 @@ IGN_RENDERING_DEPENDENCIES="${ogre_pkg}\\
                             libfreeimage-dev \\
                             libglew-dev \\
                             libignition-cmake1-dev \\
-                            libignition-common-dev \\
-                            libignition-math4-dev \\
+                            libignition-common2-dev \\
+                            libignition-math5-dev \\
                             libogre-1.9-dev \\
                             libx11-dev \\
                             mesa-common-dev \\
