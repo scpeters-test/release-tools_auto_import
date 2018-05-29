@@ -27,6 +27,8 @@ fi
 ROS_WS_PREBUILD_HOOK="""
 if [[ ${ROS_DISTRO} == 'lunar' ]]; then
   git clone https://github.com/uos/katana_driver -b ${ROS_DISTRO}
+elif [[ ${ROS_DISTRO} == 'melodic' ]]; then
+  git clone https://github.com/uos/katana_driver -b lunar
 else
   git clone https://github.com/tu-darmstadt-ros-pkg/hector_gazebo -b ${ROS_DISTRO}-devel
 fi
