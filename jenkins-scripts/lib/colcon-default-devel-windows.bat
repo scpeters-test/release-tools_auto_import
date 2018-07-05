@@ -18,7 +18,7 @@
 
 set win_lib=%SCRIPT_DIR%\lib\windows_library.bat
 set TEST_RESULT_PATH=%WORKSPACE%\ws\build\%COLCON_PACKAGE%\test_results
-set EXPORT_TEST_RESULT_PATH=%WORKSPACE%\build\test_results
+set EXPORT_TEST_RESULT_PATH=%WORKSPACE%\test_results
 set LOCAL_WS=%WORKSPACE%\ws
 set LOCAL_WS_SOFTWARE_DIR=%LOCAL_WS%\%VCS_DIRECTORY%
 set LOCAL_WS_BUILD=%WORKSPACE%\build
@@ -48,17 +48,15 @@ call %win_lib% :configure_msvc2017_compiler
 echo # END SECTION
 
 echo # BEGIN SECTION: setup workspace
-if defined KEEP_WORKSPACE (
-  if "%KEEP_WORKSPACE%" == "true" (
-    if exist %LOCAL_WS_BUILD% (
-      echo # BEGIN SECTION: preclean workspace
-      rmdir /s /q %LOCAL_WS_BUILD% || goto :error
-      echo # END SECTION
-    )
-  )
+if NOT %KEEP_WORKSPACE% == 1 (
+  IF exist %LOCAL_WS_BUILD% ( 
+     echo # BEGIN SECTION: preclean workspace
+     rmdir /s /q %LOCAL_WS_BUILD% || goto :error
+     echo # END SECTION
+  ) 
 )
 mkdir %LOCAL_WS% || echo "Workspace already exists!"
-cd /d %LOCAL_WS%
+cd %LOCAL_WS%
 echo # END SECTION
 
 echo # BEGIN SECTION: get open robotics deps (%GAZEBODISTRO_FILE%) sources into the workspace
