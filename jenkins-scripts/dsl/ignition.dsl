@@ -2,15 +2,36 @@ import _configs_.*
 import javaposse.jobdsl.dsl.Job
 
 // IGNITION PACKAGES
-ignition_software           = [ 'transport', 'fuel-tools', 'math', 'msgs', 'cmake', 'common', 'rndf', 'gui', 'sensors' ]
-ignition_debbuild           = ignition_software + [ 'transport2', 'transport3', 'math3', 'math4', 'msgs0' ]
-ignition_gpu                = [ 'gui', 'sensors' ]
-ignition_no_pkg_yet         = [ 'gui', 'fuel-tools', 'sensors' ]
+ignition_software = [ 'cmake',
+                      'common',
+                      'fuel-tools',
+                      'gui',
+                      'math',
+                      'msgs',
+                      'physics',
+                      'rendering',
+                      'rndf',
+                      'sensors',
+                      'tools',
+                      'transport' ]
+ignition_debbuild  = ignition_software + [ 'cmake1','cmake2',
+                                           'common2',
+                                           'math5',
+                                           'msgs0', 'msgs2',
+                                           'transport5' ]
+ignition_gpu                = [ 'gui', 'rendering', 'sensors' ]
+ignition_no_pkg_yet         = [ 'gui', 'physics', 'rendering', 'rndf', 'sensors' ]
+ignition_no_test            = [ 'tools' ]
 // no branches in ignition_branches means no released branches
-ignition_branches           = [ common    : [ '1' ],
-                                math      : [ '2', '3','4' ],
-                                msgs      : [ '1' ],
-                                transport : [ '3','4' ]]
+ignition_branches           = [ 'common'     : [ '1' ],
+                                'fuel-tools' : [ '1' ],
+                                'math'       : [ '2', '3','4' ],
+                                'msgs'       : [ '1' ],
+                                'transport'  : [ '3','4' ]]
+// packages using colcon for windows compilation while migrating all them to
+// this solution
+ignition_colcon_win         = [ 'physics' ]
+
 // Main platform using for quick CI
 def ci_distro               = Globals.get_ci_distro()
 def abi_distro              = Globals.get_abi_distro()
@@ -72,6 +93,22 @@ void include_gpu_label_if_needed(Job job, String ign_software_name)
   }
 }
 
+boolean enable_testing(String ign_software_name)
+{
+  if (ign_software_name in ignition_no_test)
+    return false
+
+  return true
+}
+
+boolean is_a_colcon_package(String ign_software_name)
+{
+  if (ign_software_name in ignition_colcon_win)
+    return true
+
+  return false
+}
+
 // ABI Checker job
 // Need to be the before ci-pr_any so the abi job name is defined
 ignition_software.each { ign_sw ->
@@ -84,7 +121,7 @@ ignition_software.each { ign_sw ->
       OSRFLinuxABI.create(abi_job)
       OSRFBitbucketHg.create(abi_job,
                             "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
-                            "default", checkout_subdir)
+                            '${DEST_BRANCH}', checkout_subdir)
       abi_job.with
       {
         steps {
@@ -104,53 +141,63 @@ ignition_software.each { ign_sw ->
 
 // MAIN CI JOBS (check every 5 minutes)
 ignition_software.each { ign_sw ->
-  ci_distro.each { distro ->
-    supported_arches.each { arch ->
-      // --------------------------------------------------------------
-      // 1. Create the any job
-      def ignition_ci_job_name = "ignition_${ign_sw}-ci-pr_any-${distro}-${arch}"
-      def ignition_ci_any_job = job(ignition_ci_job_name)
-      OSRFLinuxCompilationAny.create(ignition_ci_any_job,
-                                    "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}")
-      include_gpu_label_if_needed(ignition_ci_any_job, ign_sw)
-      ignition_ci_any_job.with
+  supported_arches.each { arch ->
+    // --------------------------------------------------------------
+    // 1. Create the any job
+    def ignition_ci_job_name = "ignition_${ign_sw}-ci-pr_any-ubuntu_auto-${arch}"
+    def ignition_ci_any_job = job(ignition_ci_job_name)
+    def ignition_checkout_dir = "ign-${ign_sw}"
+    OSRFLinuxCompilationAny.create(ignition_ci_any_job,
+                                  "https://bitbucket.org/ignitionrobotics/${ignition_checkout_dir}",
+                                  enable_testing(ign_sw))
+    include_gpu_label_if_needed(ignition_ci_any_job, ign_sw)
+    ignition_ci_any_job.with
+    {
+      steps
       {
-        steps
-        {
-           conditionalSteps
+         conditionalSteps
+         {
+           condition
            {
-             condition
-             {
-               not {
-                 expression('${ENV, var="DEST_BRANCH"}', 'default')
-               }
+             not {
+               expression('${ENV, var="DEST_BRANCH"}', 'default')
+             }
 
-               steps {
-                 downstreamParameterized {
-                   trigger(abi_job_names[ign_sw]) {
-                     parameters {
-                       predefinedProp("ORIGIN_BRANCH", '$DEST_BRANCH')
-                       predefinedProp("TARGET_BRANCH", '$SRC_BRANCH')
-                     }
+             steps {
+               downstreamParameterized {
+                 trigger(abi_job_names[ign_sw]) {
+                   parameters {
+                     currentBuild()
                    }
                  }
                }
              }
            }
+         }
 
-           shell("""\
-                #!/bin/bash -xe
-                export DISTRO=${distro}
-                export ARCH=${arch}
+         shell("""\
+              #!/bin/bash -xe
+              wget https://raw.githubusercontent.com/osrf/bash-yaml/master/yaml.sh
+              source yaml.sh
 
-                /bin/bash -xe ./scripts/jenkins-scripts/docker/ign_${ign_sw}-compilation.bash
-                """.stripIndent())
-        } // end of steps
-      } // end of ci_any_job
+              create_variables \${WORKSPACE}/${ignition_checkout_dir}/bitbucket-pipelines.yml
 
-      // add ci-pr_any to the list for CIWorkflow
-      ci_pr_any_list[ign_sw] << ignition_ci_job_name
-    }
+              export DISTRO=${ci_distro_str}
+
+              if [[ -n \${image} ]]; then
+                echo "Bitbucket pipeline.yml detected. Default DISTRO is ${ci_distro}"
+                export DISTRO=\$(echo \${image} | sed  's/ubuntu://')
+              fi
+
+              export ARCH=${arch}
+
+              /bin/bash -xe ./scripts/jenkins-scripts/docker/ign_${ign_sw}-compilation.bash
+              """.stripIndent())
+      } // end of steps
+    } // end of ci_any_job
+
+    // add ci-pr_any to the list for CIWorkflow
+    ci_pr_any_list[ign_sw] << ignition_ci_job_name
   }
 }
 
@@ -170,6 +217,19 @@ ignition_software.each { ign_sw ->
             (("${ign_sw}" == "math") && ("${major_version}" == "2")) ||
             (("${ign_sw}" == "math") && ("${major_version}" == "3"))))
           return
+        // no bionic for math2 or math3
+        if (("${distro}" == "bionic") && (
+            (("${ign_sw}" == "math") && ("${major_version}" == "2")) ||
+            (("${ign_sw}" == "math") && ("${major_version}" == "3"))))
+          return
+        // no bionic for transport3
+        if (("${distro}" == "bionic") && (
+            ("${ign_sw}" == "transport") && ("${major_version}" == "3")))
+          return
+        // no rndf install
+        if ("${ign_sw}" == "rndf")
+          return
+
         // No 1-dev packages, unversioned
         if ("${major_version}" == "1")
           major_version = ""
@@ -212,11 +272,12 @@ ignition_software.each { ign_sw ->
       // branches CI job scm@daily
       all_branches("${ign_sw}").each { branch ->
         def ignition_ci_job = job("ignition_${ign_sw}-ci-${branch}-${distro}-${arch}")
-        OSRFLinuxCompilation.create(ignition_ci_job)
+        OSRFLinuxCompilation.create(ignition_ci_job, enable_testing(ign_sw))
         OSRFBitbucketHg.create(ignition_ci_job,
                               "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
                               "${branch}", "ign-${ign_sw}")
 
+        include_gpu_label_if_needed(ignition_ci_job, ign_sw)
         ignition_ci_job.with
         {
           triggers {
@@ -227,6 +288,11 @@ ignition_software.each { ign_sw ->
           if (("${distro}" == "trusty") && !(
               ("${branch}" == "ign-math2") ||
               ("${branch}" == "ign-math3")))
+            disabled()
+
+          // no bionic for transport3
+          if (("${distro}" == "bionic") && (
+              ("${branch}" == "ign-transport3")))
             disabled()
 
           steps {
@@ -275,7 +341,8 @@ ignition_software.each { ign_sw ->
   String ignition_brew_ci_any_job_name = "ignition_${ign_sw}-ci-pr_any-homebrew-amd64"
   def ignition_brew_ci_any_job = job(ignition_brew_ci_any_job_name)
   OSRFBrewCompilationAny.create(ignition_brew_ci_any_job,
-                                "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}")
+                                "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}",
+                                enable_testing(ign_sw))
   ignition_brew_ci_any_job.with
   {
       steps {
@@ -299,7 +366,7 @@ ignition_software.each { ign_sw ->
   // 2. default, release branches
   all_branches("${ign_sw}").each { branch ->
     def ignition_brew_ci_job = job("ignition_${ign_sw}-ci-${branch}-homebrew-amd64")
-    OSRFBrewCompilation.create(ignition_brew_ci_job)
+    OSRFBrewCompilation.create(ignition_brew_ci_job, enable_testing(ign_sw))
     OSRFBitbucketHg.create(ignition_brew_ci_job,
                               "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
                               "${branch}", "ign-${ign_sw}", "HomeBrew")
@@ -331,10 +398,17 @@ ignition_software.each { ign_sw ->
 
 // 1. any
 ignition_software.each { ign_sw ->
-  String ignition_win_ci_any_job_name = "ignition_${ign_sw}-ci-pr_any-windows7-amd64"
+  if (is_a_colcon_package(ign_sw))
+    // colcon uses long paths and windows has a hard limit of 260 chars. Keep
+    // names minimal
+    ignition_win_ci_any_job_name = "ign_${ign_sw}-pr-win"
+  else
+    ignition_win_ci_any_job_name = "ignition_${ign_sw}-ci-pr_any-windows7-amd64"
+
   def ignition_win_ci_any_job = job(ignition_win_ci_any_job_name)
   OSRFWinCompilationAny.create(ignition_win_ci_any_job,
-                                "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}")
+                               "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}",
+                               enable_testing(ign_sw))
   ignition_win_ci_any_job.with
   {
       steps {
@@ -349,12 +423,23 @@ ignition_software.each { ign_sw ->
 
   // 2. default, release branches
   all_branches("${ign_sw}").each { branch ->
-    def ignition_win_ci_job = job("ignition_${ign_sw}-ci-${branch}-windows7-amd64")
-    OSRFWinCompilation.create(ignition_win_ci_job)
+    if (is_a_colcon_package(ign_sw)) {
+      // colcon uses long paths and windows has a hard limit of 260 chars. Keep
+      // names minimal
+      if (branch == 'default')
+        branch_name = "ci"
+      else
+        branch_name = branch - ign_sw
+      ignition_win_ci_job_name = "ign_${ign_sw}-${branch_name}-win"
+    } else {
+      ignition_win_ci_job_name = "ignition_${ign_sw}-ci-${branch}-windows7-amd64"
+    }
+
+    def ignition_win_ci_job = job(ignition_win_ci_job_name)
+    OSRFWinCompilation.create(ignition_win_ci_job, enable_testing(ign_sw))
     OSRFBitbucketHg.create(ignition_win_ci_job,
                               "https://bitbucket.org/ignitionrobotics/ign-${ign_sw}/",
                               "${branch}", "ign-${ign_sw}")
-
     ignition_win_ci_job.with
     {
         triggers {
