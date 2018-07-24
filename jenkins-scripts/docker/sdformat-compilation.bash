@@ -15,17 +15,22 @@ if [[ -z ${DISTRO} ]]; then
 fi
 
 . "${SCRIPT_DIR}/lib/_sdformat_version_hook.bash"
+. "${SCRIPT_DIR}/lib/_gz11_hook.bash"
 
 export BUILDING_SOFTWARE_DIRECTORY="sdformat"
-export BUILDING_PKG_DEPENDENCIES_VAR_NAME="SDFORMAT_BASE_DEPENDENCIES"
-export BUILDING_JOB_REPOSITORIES="stable"
 
 if [[ ${SDFORMAT_MAJOR_VERSION} -ge 6 ]]; then
   export BUILDING_EXTRA_CMAKE_PARAMS="-DUSE_INTERNAL_URDF:BOOL=True"
 fi
 
-if [[ ${DEST_BRANCH} == 'gz11' ]] || [[ ${SRC_BRANCH} == 'gz11' ]]; then
-  export USE_GCC8=true
+if ${NEEDS_GZ11_SUPPORT}; then
+  export BUILDING_PKG_DEPENDENCIES_VAR_NAME="SDFORMAT_NO_IGN_DEPENDENCIES"
+  export BUILD_IGN_CMAKE=true
+  export BUILD_IGN_MATH=true
+else
+  # default and major branches compilations
+  export BUILDING_PKG_DEPENDENCIES_VAR_NAME="SDFORMAT_BASE_DEPENDENCIES"
+  export BUILDING_JOB_REPOSITORIES="stable"
 fi
 
 . "${SCRIPT_DIR}/lib/generic-building-base.bash"
