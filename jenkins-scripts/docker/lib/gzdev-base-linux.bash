@@ -34,7 +34,7 @@ echo '# END SECTION'
 
 echo '# BEGIN SECTION: run gzdev for gazebo9 with nvidia'
 cd ${WORKSPACE}/gzdev
-./gzdev.py spawn --gzv=8 --nvidia
+./gzdev.py spawn --gzv=8 --nvidia &
 echo '# END SECTION'
 
 echo '# BEGIN SECTION: Disply log file.'
