@@ -2,7 +2,7 @@
 if [[ ${DEST_BRANCH} == 'gz11' ]] || [[ ${SRC_BRANCH} == 'gz11' ]]; then
   export NEEDS_GZ11_SUPPORT=true
 else
-  export NEEDS_GZ11_SUPPORT=true
+  export NEEDS_GZ11_SUPPORT=false
 fi
 
 # needs gcc8 for c++17 features
