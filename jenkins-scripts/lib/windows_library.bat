@@ -234,8 +234,10 @@ goto :EOF
 :: arg1: package to install
 set LIB_DIR=%~dp0
 call %LIB_DIR%\windows_env_vars.bat
-
-%VCPKG_CMD% install "%1"
+echo "VCPKG_TARGET_TRIPLET=%VCPKG_TARGET_TRIPLET%"
+echo "VCPKG_TARGET_ARCHITECTURE=%VCPKG_TARGET_ARCHITECTURE%"
+ 
+%VCPKG_CMD% install --triplet %VCPKG_TARGET_TRIPLET% "%1"
 goto :EOF
 
 :: ##################################
