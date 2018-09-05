@@ -22,6 +22,7 @@ export BUILDING_SOFTWARE_DIRECTORY="ign-sensors"
 # all dependencies of ign-sensors are ignition/sdformat
 export BUILD_IGN_COMMON=true
 export BUILD_IGN_RENDERING=true
+export BUILD_IGN_TOOLS=true
 export BUILDING_PKG_DEPENDENCIES_VAR_NAME="IGN_SENSORS_DEPENDENCIES"
 # export BUILDING_JOB_REPOSITORIES="stable"
 
