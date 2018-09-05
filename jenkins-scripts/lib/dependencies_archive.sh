@@ -655,7 +655,10 @@ IGN_RENDERING_DEPENDENCIES="${IGN_RENDERING_NO_IGN_DEPENDENCIES} \\
                             libignition-common2-dev \\
                             libignition-math5-dev"
 
-IGN_SENSORS_DEPENDENCIES="libignition-common2-dev     \\
+IGN_SENSORS_NO_IGN_DEPENDENCIES=""
+
+IGN_SENSORS_DEPENDENCIES="${IGN_SENSORS_NO_IGN_DEPENDENCIES} \\
+                          libignition-common2-dev     \\
                           libignition-cmake1-dev \\
                           libignition-math5-dev      \\
                           libignition-msgs2-dev       \\
