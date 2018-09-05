@@ -655,15 +655,11 @@ IGN_RENDERING_DEPENDENCIES="${IGN_RENDERING_NO_IGN_DEPENDENCIES} \\
                             libignition-common2-dev \\
                             libignition-math5-dev"
 
-IGN_SENSORS_NO_IGN_DEPENDENCIES=""
-
-IGN_SENSORS_DEPENDENCIES="${IGN_SENSORS_NO_IGN_DEPENDENCIES} \\
-                          libignition-common2-dev     \\
-                          libignition-cmake1-dev \\
-                          libignition-math5-dev      \\
-                          libignition-msgs2-dev       \\
-                          libignition-tools-dev \\
-                          libignition-transport5-dev \\
+IGN_SENSORS_DEPENDENCIES="libignition-common3-dev     \\
+                          libignition-cmake2-dev \\
+                          libignition-math6-dev      \\
+                          libignition-msgs3-dev       \\
+                          libignition-transport6-dev \\
                           libsdformat6-dev"
 
 IGN_RNDF_DEPENDENCIES="libignition-cmake-dev \\
