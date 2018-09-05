@@ -20,6 +20,10 @@ export NEEDS_GZ11_SUPPORT=true
 export BUILDING_SOFTWARE_DIRECTORY="ign-sensors"
 
 # all dependencies of ign-sensors are ignition/sdformat
+export BUILD_SDFORMAT=true
+export BUILD_IGN_CMAKE=true
+export BUILD_IGN_MATH=true
+export BUILD_IGN_MSGS=true
 export BUILD_IGN_COMMON=true
 export BUILD_IGN_RENDERING=true
 export BUILD_IGN_TOOLS=true
