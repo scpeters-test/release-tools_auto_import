@@ -32,8 +32,8 @@ if ${NEEDS_GZ11_SUPPORT}; then
   export BUILD_SDFORMAT=true
 else
   export BUILDING_PKG_DEPENDENCIES_VAR_NAME="IGN_SENSORS_DEPENDENCIES"
-  export BUILDING_JOB_REPOSITORIES="stable"
 fi
+export BUILDING_JOB_REPOSITORIES="stable"
 
 if [[ $(date +%Y%m%d) -le 20181231 ]]; then
   ## need prerelease repo to get ignition-cmake1 for ign-rendering
