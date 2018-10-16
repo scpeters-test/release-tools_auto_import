@@ -19,6 +19,7 @@ ignition_debbuild  = ignition_software + [ 'cmake1','cmake2',
                                            'common2',
                                            'math5',
                                            'msgs0', 'msgs2',
+                                           'plugin0',
                                            'transport5' ]
 ignition_gpu                = [ 'gui', 'rendering', 'sensors' ]
 ignition_no_pkg_yet         = [ 'gui', 'physics', 'plugin', 'rndf', 'sensors' ]
@@ -28,6 +29,7 @@ ignition_branches           = [ 'common'     : [ '1' ],
                                 'fuel-tools' : [ '1' ],
                                 'math'       : [ '2', '3','4' ],
                                 'msgs'       : [ '1' ],
+                                'plugin'     : [ '0' ],
                                 'transport'  : [ '3','4' ]]
 // physics/sensors don't need to be included since they use default for gz11
 ignition_prerelease_branches = [ 'cmake'     : [ 'gz11' ],
@@ -35,7 +37,7 @@ ignition_prerelease_branches = [ 'cmake'     : [ 'gz11' ],
                                  'gui'       : [ 'gz11' ],
                                  'math'      : [ 'gz11' ],
                                  'msgs'      : [ 'gz11' ],
-                                 'plugin'    : [ 'gz11' ],
+                                 'plugin'    : [ 'ign-plugin1' ],
                                  'rendering' : [ 'gz11' ],
                                  'transport' : [ 'gz11' ]]
 // packages using colcon for windows compilation while migrating all them to
