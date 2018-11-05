@@ -420,7 +420,8 @@ else
     #
     # ROS1
     #
-    ROS_GAZEBO_PKGS_DEPENDENCIES="ros-${ROS_DISTRO}-ros                     \\
+    ROS_GAZEBO_PKGS_DEPENDENCIES="${ROS_GAZEBO_PKGS_COMMON_DEPS}            \\
+                                  ros-${ROS_DISTRO}-ros                     \\
                                   ros-${ROS_DISTRO}-catkin                  \\
                                   ros-${ROS_DISTRO}-pluginlib               \\
                                   ros-${ROS_DISTRO}-roscpp                  \\
@@ -547,18 +548,18 @@ if [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 4 ]]; then
     export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
                                 libignition-cmake-dev \\
                                 libignition-msgs-dev"
-elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -ge 5 ]]; then
-    export IGN_TRANSPORT_NO_IGN_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
-                                libsqlite3-dev \\
-                                ruby-ffi"
+elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 5 ]]; then
     export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
                                 libignition-cmake1-dev \\
-                                libignition-msgs2-dev"
-    if [[ ${DISTRO} != 'xenial' ]]; then
-      export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
+                                libignition-msgs2-dev \\
+                                libsqlite3-dev \\
+                                ruby-ffi"
+elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 6 ]]; then
+    export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
                                   libignition-cmake2-dev \\
-                                  libignition-msgs3-dev"
-    fi
+                                  libignition-msgs3-dev \\
+                                  libsqlite3-dev \\
+                                  ruby-ffi"
 else
     export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
                                 libignition-msgs0-dev"
@@ -649,11 +650,12 @@ IGN_GUI_DEPENDENCIES="${IGN_GUI_NO_IGN_DEPENDENCIES} \\
                       libignition-common2-dev"
 
 if [[ ${DISTRO} != 'xenial' ]]; then
-  IGN_GUI_DEPENDENCIES="${IGN_GUI_IGN_DEPENDENCIES} \\
+  IGN_GUI_DEPENDENCIES="${IGN_GUI_DEPENDENCIES} \\
                         libignition-cmake2-dev \\
                         libignition-common3-dev \\
                         libignition-math6-dev \\
                         libignition-msgs3-dev \\
+                        libignition-plugin-dev \\
                         libignition-rendering-dev \\
                         libignition-transport6-dev"
 fi
@@ -665,7 +667,8 @@ IGN_PHYSICS_DEPENDENCIES="libbullet-dev \\
                           libignition-cmake2-dev \\
                           libignition-math6-dev \\
                           libignition-math6-eigen3-dev \\
-                          libignition-plugin-dev"
+                          libignition-plugin-dev \\
+                          libsdformat8-dev"
 IGN_PHYSICS_DART_FROM_PKGS="true"
 
 IGN_PLUGIN_DEPENDENCIES="libignition-cmake1-dev"
