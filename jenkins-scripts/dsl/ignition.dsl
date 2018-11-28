@@ -5,6 +5,7 @@ import javaposse.jobdsl.dsl.Job
 ignition_software = [ 'cmake',
                       'common',
                       'fuel-tools',
+                      'gazebo',
                       'gui',
                       'math',
                       'msgs',
@@ -16,7 +17,8 @@ ignition_software = [ 'cmake',
                       'tools',
                       'transport' ]
 // DESC: need gpu/display for tests
-ignition_gpu                = [ 'gui',
+ignition_gpu                = [ 'gazebo',
+                                'gui',
                                 'rendering',
                                 'sensors' ]
 // DESC: software does not have tests
@@ -50,7 +52,8 @@ ignition_debbuild  = ignition_software + [ 'cmake1','cmake2',
                                            'msgs0', 'msgs2',
                                            'transport5' ]
 // DESC: exclude ignition from generate any install testing job
-ignition_no_pkg_yet         = [ 'gui',
+ignition_no_pkg_yet         = [ 'gazebo',
+                                'gui',
                                 'physics',
                                 'plugin',
                                 'rndf',

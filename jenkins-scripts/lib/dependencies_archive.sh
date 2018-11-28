@@ -624,6 +624,20 @@ else #default in not defined
                            libignition-math5-dev"
 fi
 
+IGN_GAZEBO_NO_IGN_DEPENDENCIS="libgflags-dev"
+
+IGN_GAZEBO_DEPENDENCIES="${IGN_GAZEBO_NO_IGN_DEPENDENCIES} \\
+                      libignition-cmake2-dev \\
+                      libignition-common3-dev \\
+                      libignition-gui-dev \\
+                      libignition-math6-dev \\
+                      libignition-math6-eigen3-dev \\
+                      libignition-physics-dev \\
+                      libignition-plugin-dev \\
+                      libignition-rendering-dev \\
+                      libignition-tools-dev \\
+                      libignition-transport6-dev"
+
 IGN_GUI_NO_IGN_DEPENDENCIES="qtbase5-dev \\
                       qtdeclarative5-dev \\
                       libtinyxml2-dev \\
