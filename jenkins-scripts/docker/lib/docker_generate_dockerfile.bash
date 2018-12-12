@@ -58,7 +58,11 @@ case ${ARCH} in
      fi
      ;;
    'armhf' | 'arm64' )
-       FROM_VALUE=osrf/${LINUX_DISTRO}_${ARCH}:${DISTRO}
+       if [[ $DISTRO == 'sid' ]]; then
+	 FROM_VALUE=aarch64/${LINUX_DISTRO}:${DISTRO}
+       else
+         FROM_VALUE=osrf/${LINUX_DISTRO}_${ARCH}:${DISTRO}
+       fi
      ;;
   *)
      echo "Arch unknown"
