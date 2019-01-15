@@ -29,6 +29,9 @@ mkdir %LOCAL_WS% || echo "The workspace already exists. Fine"
 cd %LOCAL_WS% || goto :error
 
 echo # BEGIN SECTION: downloading ign-transport dependencies and unzip
+:: avoid conflicts with vcpkg packages
+call %win_lib% :disable_vcpkg_integration
+
 call %win_lib% :wget http://packages.osrfoundation.org/win32/deps/cppzmq-noarch.zip cppzmq-noarch.zip
 call %win_lib% :wget http://packages.osrfoundation.org/win32/deps/protobuf-2.6.0-cmake3.5-win%BITNESS%-vc12.zip protobuf-2.6.0-cmake3.5-win%BITNESS%-vc12.zip
 call %win_lib% :wget http://packages.osrfoundation.org/win32/deps/zeromq-4.0.4-%PLATFORM_TO_BUILD%.zip zeromq-4.0.4-%PLATFORM_TO_BUILD%.zip
@@ -42,7 +45,7 @@ echo # END SECTION
 echo # BEGIN SECTION: compile and install ign-math
 set IGN_MATH_DIR=%WORKSPACE%\ign-math
 if EXIST %IGN_MATH_DIR% ( rmdir /s /q %IGN_MATH_DIR% )
-hg clone https://bitbucket.org/ignitionrobotics/ign-math -b ign-math4 %IGN_MATH_DIR%
+hg clone https://bitbucket.org/ignitionrobotics/ign-math -b ign-math3 %IGN_MATH_DIR%
 set VCS_DIRECTORY=ign-math
 set KEEP_WORKSPACE=TRUE
 set ENABLE_TESTS=FALSE
@@ -52,7 +55,7 @@ echo # END SECTION
 echo # BEGIN SECTION: compile and install ign-msgs
 set IGN_MSGS_DIR=%WORKSPACE%\ign-msgs
 if EXIST %IGN_MSGS_DIR% ( rmdir /s /q %IGN_MSGS_DIR% )
-hg clone https://bitbucket.org/ignitionrobotics/ign-msgs -b ign-msgs1 %IGN_MSGS_DIR%
+hg clone https://bitbucket.org/ignitionrobotics/ign-msgs -b ign-msgs0 %IGN_MSGS_DIR%
 set VCS_DIRECTORY=ign-msgs
 set KEEP_WORKSPACE=TRUE
 set ENABLE_TESTS=FALSE
