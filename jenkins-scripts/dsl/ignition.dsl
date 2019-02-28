@@ -260,6 +260,10 @@ ignition_software.each { ign_sw ->
     {
       steps
       {
+         parameters {
+           booleanParam('INVALIDATE_DOCKER_CACHE', true, 'invalidate docker cache')
+         }
+
          conditionalSteps
          {
            condition
@@ -401,6 +405,10 @@ ignition_software.each { ign_sw ->
         {
           triggers {
             scm('@daily')
+          }
+
+          parameters {
+            booleanParam('INVALIDATE_DOCKER_CACHE', true, 'invalidate docker cache')
           }
 
           // only a few release branches support trusty anymore
