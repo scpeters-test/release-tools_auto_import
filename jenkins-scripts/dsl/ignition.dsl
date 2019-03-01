@@ -7,6 +7,7 @@ ignition_software = [ 'cmake',
                       'fuel-tools',
                       'gazebo',
                       'gui',
+                      'launch',
                       'math',
                       'msgs',
                       'physics',
@@ -58,7 +59,7 @@ ignition_prerelease_pkgs    = [ 'gui'    : [
                                 ]]
 // packages using colcon for windows compilation while migrating all them to
 // this solution
-ignition_colcon_win         = [ 'gui', 'physics', 'rendering', 'sensors' ]
+ignition_colcon_win         = [ 'gui', 'physics', 'launch', 'rendering', 'sensors' ]
 
 // Main platform using for quick CI
 def ci_distro               = Globals.get_ci_distro()
