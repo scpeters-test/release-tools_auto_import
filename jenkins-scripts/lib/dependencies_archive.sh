@@ -559,7 +559,7 @@ elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 5 ]]; then
                                 libignition-msgs2-dev \\
                                 libsqlite3-dev \\
                                 ruby-ffi"
-elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -eq 6 ]]; then
+elif [[ ${IGN_TRANSPORT_MAJOR_VERSION} -ge 6 ]]; then
     export IGN_TRANSPORT_DEPENDENCIES="${IGN_TRANSPORT_NO_IGN_DEPENDENCIES} \\
                                   libignition-cmake2-dev \\
                                   libignition-msgs3-dev \\
@@ -633,7 +633,7 @@ elif [[ -n ${IGN_MSGS_MAJOR_VERSION} && ${IGN_MSGS_MAJOR_VERSION} -eq 1 ]]; then
     IGN_MSGS_DEPENDENCIES="${IGN_MSGS_DEPENDENCIES} \\
                            libignition-cmake-dev \\
                            libignition-math4-dev"
-elif [[ -n ${IGN_MSGS_MAJOR_VERSION} && ${IGN_MSGS_MAJOR_VERSION} -eq 3 ]]; then
+elif [[ -n ${IGN_MSGS_MAJOR_VERSION} && ${IGN_MSGS_MAJOR_VERSION} -ge 3 ]]; then
     IGN_MSGS_DEPENDENCIES="${IGN_MSGS_DEPENDENCIES} \\
                            libignition-cmake2-dev \\
                            libignition-math6-dev"
@@ -679,8 +679,8 @@ if [[ ${DISTRO} != 'xenial' ]]; then
                         libignition-transport6-dev"
 fi
 
-IGN_PHYSICS_DEPENDENCIES="libbullet-dev \\
-                          dart6-data \\
+IGN_PHYSICS_DEPENDENCIES="dart6-data \\
+                          libdart6-collision-ode-dev \\
                           libdart6-dev \\
                           libdart6-utils-urdf-dev \\
                           libignition-cmake2-dev \\
@@ -696,6 +696,19 @@ if [[ ${DISTRO} != 'xenial' ]]; then
   IGN_PLUGIN_DEPENDENCIES="${IGN_PLUGIN_DEPENDENCIES} \\
                            libignition-cmake2-dev"
 fi
+
+IGN_LAUNCH_DEPENDENCIES="libignition-cmake2-dev \\
+                          libignition-common3-dev \\
+                          libignition-gazebo-dev \\
+                          libignition-gui-dev \\
+                          libignition-msgs3-dev \\
+                          libignition-plugin-dev \\
+                          libignition-tools-dev \\
+                          libignition-transport6-dev \\
+                          libsdformat8-dev \\
+                          libtinyxml2-dev  \\
+                          qtquickcontrols2-5-dev \\
+                          libqt5core5a"
 
 IGN_RENDERING_NO_IGN_DEPENDENCIES="${ogre_pkg}\\
                             freeglut3-dev \\
@@ -723,6 +736,7 @@ IGN_SENSORS_DEPENDENCIES="libignition-common3-dev     \\
                           libignition-cmake2-dev \\
                           libignition-math6-dev      \\
                           libignition-msgs3-dev       \\
+                          libignition-plugin-dev  \\
                           libignition-tools-dev \\
                           libignition-transport6-dev \\
                           libignition-rendering-dev \\
@@ -730,6 +744,7 @@ IGN_SENSORS_DEPENDENCIES="libignition-common3-dev     \\
 
 IGN_GAZEBO_DEPENDENCIES="libignition-common3-dev     \\
                          libignition-cmake2-dev \\
+                         libignition-fuel-tools3-dev \\
                          libignition-gui-dev \\
                          libgflags-dev \\
                          libignition-math6-dev      \\
