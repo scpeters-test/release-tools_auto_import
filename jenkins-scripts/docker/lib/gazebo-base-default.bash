@@ -97,12 +97,13 @@ fi
 # Check for DART
 if $DART_COMPILE_FROM_SOURCE; then
   echo '# BEGIN SECTION: compiling DART from source'
-  if [ -d $WORKSPACE/dart ]; then
-      cd $WORKSPACE/dart
-      git pull
-  else
-     git clone https://github.com/dartsim/dart.git $WORKSPACE/dart
-  fi
+  rm -rf $WORKSPACE/dart
+  git clone https://github.com/dartsim/dart.git $WORKSPACE/dart
+
+  cd $WORKSPACE/dart
+  [[ -z ${DART_COMPILE_FROM_SOURCE_BRANCH} ]] && DART_COMPILE_FROM_SOURCE_BRANCH="default"
+  git checkout ${DART_COMPILE_FROM_SOURCE_BRANCH}
+
   rm -fr $WORKSPACE/dart/build
   mkdir -p $WORKSPACE/dart/build
   cd $WORKSPACE/dart/build
@@ -235,6 +236,10 @@ sh tools/code_check.sh -xmldir $WORKSPACE/build/cppcheck_results || true
 stop_stopwatch CPPCHECK
 echo '# END SECTION'
 DELIM
+
+if ${DART_COMPILE_FROM_SOURCE}; then
+  EXTRA_PACKAGES="${EXTRA_PACKAGES} git"
+fi
 
 USE_OSRF_REPO=true
 DEPENDENCY_PKGS="${BASE_DEPENDENCIES} \
