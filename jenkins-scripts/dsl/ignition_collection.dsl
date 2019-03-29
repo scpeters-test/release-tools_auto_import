@@ -14,6 +14,7 @@ ignition_collections = [
     nightly_jobs: [
           'cmake'     : [ debbuild: 'ign-cmake2'    , branch: 'ign-cmake2'   ],
           'common'    : [ debbuild: 'ign-common3'   , branch: 'ign-common3'  ],
+          'fuel-tools': [ debbuild: 'fuel-tools'    , branch: 'default'      ],
           'gazebo'    : [ debbuild: 'ign-gazebo2'   , branch: 'default'      ],
           'gui'       : [ debbuild: 'ign-gui'       , branch: 'ign-gui1'     ],
           'launch'    : [ debbuild: 'ign-launch'    , branch: 'ign-launch0'  ],
@@ -169,7 +170,7 @@ ignition_collections.each { ign_collection ->
    }
 
   // Ignition dashboards
-  dashboardView("ign-${ign_collection}")
+  dashboardView("ign-${ign_collection_name}")
   {
       jobs {
           ignition_collection_jobs["${ign_collection_name}"].each { jobname ->
@@ -242,6 +243,7 @@ nightly_scheduler_job.with
 
   cmake_branch = collection_data.get('cmake').get('branch')
   common_branch = collection_data.get('common').get('branch')
+  fuel_tools_branch = collection_data.get('fuel-tools').get('branch')
   gazebo_branch = collection_data.get('gazebo').get('branch')
   gui_branch = collection_data.get('gui').get('branch')
   launch_branch = collection_data.get('launch').get('branch')
@@ -277,6 +279,8 @@ nightly_scheduler_job.with
                 src_branch="${cmake_branch}"
               elif [[ "\${n}" != "\${n/common/}" ]]; then
                 src_branch="${common_branch}"
+              elif [[ "\${n}" != "\${n/fuel-tools/}" ]]; then
+                src_branch="${fuel_tools_branch}"
               elif  [[ "\${n}" != "\${n/gazebo/}" ]]; then
                 src_branch="${gazebo_branch}"
               elif  [[ "\${n}" != "\${n/gui/}" ]]; then
