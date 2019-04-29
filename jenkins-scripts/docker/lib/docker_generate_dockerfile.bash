@@ -304,7 +304,7 @@ if $USE_GPU_DOCKER; then
  # NVIDIA is using nvidia_docker integration
 cat >> Dockerfile << DELIM_NVIDIA_GPU
 LABEL com.nvidia.volumes.needed="nvidia_driver"
-ENV PATH /usr/local/nvidia/bin:${PATH}
+ENV PATH /usr/local/nvidia/bin:\${PATH}
 ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
 DELIM_NVIDIA_GPU
   else
@@ -331,7 +331,8 @@ fi
 cat >> Dockerfile << DELIM_WORKAROUND_91
 # Workaround to issue:
 # https://bitbucket.org/osrf/handsim/issue/91
-RUN apt-get update && dpkg -L locales && which locale-gen
+RUN dpkg -L locales && echo \$PATH 
+RUN export PATH=\$PATH
 RUN echo "en_GB.utf8 UTF-8" >> /etc/locale.gen
 RUN locale-gen en_GB.utf8
 ENV LC_ALL en_GB.utf8
