@@ -164,8 +164,9 @@ cmake ${GAZEBO_BASE_CMAKE_ARGS}      \\
 echo '# END SECTION'
 
 echo '# BEGIN SECTION: debug'
-for f in /usr/lib/x86_64-linux-gnu/libGL*.so; do nm -D \$f 2>/dev/null | grep -i glapi_tls_Current | awk '{print "'\$f':" \$0}'; done
-ldd -r /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/libGL.so
+#for f in /usr/lib/x86_64-linux-gnu/libGL*.so; do nm -D \$f 2>/dev/null | grep -i glapi_tls_Current | awk '{print "'\$f':" \$0}'; done
+for f in /usr/lib/x86_64-linux-gnu/libGLdispatch.so; do nm -D \$f 2>/dev/null | grep -i glapi_tls_Current | awk '{print "'\$f':" \$0}'; don
+ldd -r /usr/lib/x86_64-linux-gnu/libGL.so 
 # find /usr -name *libGL* -exec ls -las {} \\;
 echo '# END SECTION'
 
