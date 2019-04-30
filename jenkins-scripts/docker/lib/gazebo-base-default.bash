@@ -165,13 +165,13 @@ echo '# END SECTION'
 
 echo '# BEGIN SECTION: debug'
 for f in /usr/lib/x86_64-linux-gnu/libGL*.so; do nm -D \$f 2>/dev/null | grep -i glapi_tls_Current | awk '{print "'\$f':" \$0}'; done
-ls -lash /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/libGL.so
-find /usr -name *libGL* -exec ls -las {} \\;
+ldd -r /usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/libGL.so
+# find /usr -name *libGL* -exec ls -las {} \\;
 echo '# END SECTION'
 
 echo '# BEGIN SECTION: Gazebo compilation'
 init_stopwatch COMPILATION
-make -j${MAKE_JOBS}
+VERBOSE=1 make -j${MAKE_JOBS} gzserver
 stop_stopwatch COMPILATION
 echo '# END SECTION'
 
