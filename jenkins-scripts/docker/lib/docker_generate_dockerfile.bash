@@ -305,6 +305,7 @@ if $USE_GPU_DOCKER; then
 cat >> Dockerfile << DELIM_NVIDIA_GPU
 LABEL com.nvidia.volumes.needed="nvidia_driver"
 ENV PATH /usr/local/nvidia/bin:\${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:\${LD_LIBRARY_PATH}
 DELIM_NVIDIA_GPU
   else
   # No NVIDIA cards needs to have the same X stack than the host
