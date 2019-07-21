@@ -10,7 +10,7 @@ export USE_DOCKER_IN_DOCKER=true
 export INSTALL_JOB_POSTINSTALL_HOOK="""
 echo '# BEGIN SECTION: testing by running dockerhub'
 
-docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=\$XAUTH -v \"/tmp/.X11-unix:/tmp/.X11-unix\" -v \"/etc/localtime:/etc/localtime:ro\" -v \"/dev/input:/dev/input\" --network host --rm --privileged --runtime=nvidia --security-opt seccomp=unconfined nkoenig/subt-virtual-testbed tunnel_circuit_practice.ign worldName:=tunnel_circuit_practice_01 robotName1:=X1 robotConfig1:=X1_SENSOR_CONFIG1
+docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=\$XAUTH -v \"/tmp/.X11-unix:/tmp/.X11-unix\" -v \"/etc/localtime:/etc/localtime:ro\" -v \"/dev/input:/dev/input\" --network host --rm --privileged --security-opt seccomp=unconfined nkoenig/subt-virtual-testbed tunnel_circuit_practice.ign worldName:=tunnel_circuit_practice_01 robotName1:=X1 robotConfig1:=X1_SENSOR_CONFIG1
 
 echo '# END SECTION'
 """

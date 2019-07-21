@@ -12,6 +12,8 @@ echo '# BEGIN SECTION: testing - download'
 cd $WORKSPACE
 mkdir -p ~/subt_docker/subt && cd ~/subt_docker/subt
 wget https://bitbucket.org/osrf/subt/raw/tunnel_circuit/docker/subt_shell/Dockerfile
+# need to workaround the fact of using root for docker
+sed -i -e s:--uid\\ \\$\\{user_id\\}:: Dockerfile
 cd ..
 wget https://bitbucket.org/osrf/subt/raw/tunnel_circuit/docker/build.bash
 wget https://bitbucket.org/osrf/subt/raw/tunnel_circuit/docker/run.bash
@@ -19,7 +21,6 @@ wget https://bitbucket.org/osrf/subt/raw/tunnel_circuit/docker/join.bash
 chmod u+x build.bash run.bash join.bash
 echo '# END SECTION'
 echo '# BEGIN SECTION: testing - build'
-export UID=500
 ./build.bash subt
 echo '# END SECTION'
 echo '# BEGIN SECTION: testing - run'
