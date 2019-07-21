@@ -163,12 +163,12 @@ all_supported_distros.each { distro ->
 
     // --------------------------------------------------------------
     // 1. Install subt testing pkg testing
-    def install_default_job = job("subt-install-docker_container-${distro}-${arch}")
-    OSRFLinuxInstall.create(install_default_job)
+    def install_docker_job = job("subt-install-docker_container-${distro}-${arch}")
+    OSRFLinuxInstall.create(install_docker_job)
     // GPU label and parselog
-    include_parselog(install_default_job)
+    include_parselog(install_docker_job)
 
-    install_default_job.with
+    install_docker_job.with
     {
       triggers {
         cron('@daily')
