@@ -26,4 +26,6 @@ echo '# BEGIN SECTION: testing - run'
 echo '# END SECTION'
 """
 
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} wget"
+
 . ${SCRIPT_DIR}/lib/generic-install-base.bash

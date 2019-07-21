@@ -15,4 +15,6 @@ docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=\$XAUTH -v \"\$XAU
 echo '# END SECTION'
 """
 
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} docker"
+
 . ${SCRIPT_DIR}/lib/generic-install-base.bash
