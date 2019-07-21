@@ -19,9 +19,11 @@ wget https://bitbucket.org/osrf/subt/raw/tunnel_circuit/docker/join.bash
 chmod u+x build.bash run.bash join.bash
 echo '# END SECTION'
 echo '# BEGIN SECTION: testing - build'
+export UID=500
 ./build.bash subt
 echo '# END SECTION'
 echo '# BEGIN SECTION: testing - run'
+touch /root/.Xauthority
 ./run.bash subt
 echo '# END SECTION'
 """
