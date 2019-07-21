@@ -137,7 +137,7 @@ all_supported_distros.each { distro ->
   supported_arches.each { arch ->
     // --------------------------------------------------------------
     // 1. Install subt testing pkg testing
-    def install_default_job = job("subt-install_pkg-${distro}-${arch}")
+    def install_default_job = job("subt-install-dockerhub-${distro}-${arch}")
     OSRFLinuxInstall.create(install_default_job)
     // GPU label and parselog
     include_parselog(install_default_job)
@@ -156,12 +156,37 @@ all_supported_distros.each { distro ->
 
             export DISTRO=${distro}
             export ARCH=${arch}
-            export INSTALL_JOB_PKG=subt
-            export INSTALL_JOB_REPOS="stable prerelease"
-            /bin/bash -xe ./scripts/jenkins-scripts/docker/subt-install-test-job.bash
+            /bin/bash -xe ./scripts/jenkins-scripts/docker/subt-dockerhub-test-job.bash
             """.stripIndent())
       }
     } // end of with
+
+    // --------------------------------------------------------------
+    // 1. Install subt testing pkg testing
+    def install_default_job = job("subt-install-docker_container-${distro}-${arch}")
+    OSRFLinuxInstall.create(install_default_job)
+    // GPU label and parselog
+    include_parselog(install_default_job)
+
+    install_default_job.with
+    {
+      triggers {
+        cron('@daily')
+      }
+
+      label "gpu-reliable"
+
+      steps {
+        shell("""\
+            #!/bin/bash -xe
+
+            export DISTRO=${distro}
+            export ARCH=${arch}
+            /bin/bash -xe ./scripts/jenkins-scripts/docker/subt-docker_container-test-job.bash
+            """.stripIndent())
+      }
+    } // end of with
+
   }
 }
 
