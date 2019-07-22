@@ -7,7 +7,10 @@ SCRIPT_DIR="${SCRIPT_DIR%/*}"
 export GPU_SUPPORT_NEEDED=true
 export USE_DOCKER_IN_DOCKER=true
 
+. ${SCRIPT_DIR}/lib/_install_nvidia_docker.sh
+
 export INSTALL_JOB_POSTINSTALL_HOOK="""
+${INSTALL_NVIDIA_DOCKER1}
 echo '# BEGIN SECTION: testing - download'
 cd $WORKSPACE
 mkdir -p ~/subt_docker/subt && cd ~/subt_docker/subt
@@ -29,6 +32,6 @@ touch /root/.Xauthority
 echo '# END SECTION'
 """
 
-export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} wget docker.io"
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} wget"
 
 . ${SCRIPT_DIR}/lib/generic-install-base.bash
