@@ -18,7 +18,7 @@ echo '# BEGIN SECTION: install docker (in docker)'
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\"
 apt-get update
-apt-get install -y docker-ce
+# apt-get install -y docker-ce
 echo '# END SECTION'
 
 echo '# BEGIN SECTION: install nvidia-docker2 (in docker)'
@@ -29,7 +29,7 @@ curl -s -L https://nvidia.github.io/nvidia-docker/\$distribution/nvidia-docker.l
   tee /etc/apt/sources.list.d/nvidia-docker.list
 apt-get update
 apt-get install -y nvidia-docker2
-systemctl daemon-reload
-systemctl restart docker
+# systemctl daemon-reload
+# systemctl restart docker
 echo '# END SECTION'
 """
