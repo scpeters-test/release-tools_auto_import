@@ -32,6 +32,6 @@ touch /root/.Xauthority
 echo '# END SECTION'
 """
 
-export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} wget"
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common wget"
 
 . ${SCRIPT_DIR}/lib/generic-install-base.bash

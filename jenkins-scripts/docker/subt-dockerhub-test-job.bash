@@ -19,6 +19,6 @@ nvidia-docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=\$XAUTH -v 
 echo '# END SECTION'
 """
 
-export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} xauth"
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common xauth"
 
 . ${SCRIPT_DIR}/lib/generic-install-base.bash
