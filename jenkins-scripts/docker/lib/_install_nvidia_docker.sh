@@ -23,9 +23,9 @@ echo '# END SECTION'
 
 echo '# BEGIN SECTION: install nvidia-docker2 (in docker)'
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
-  sudo apt-key add -
+  apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/${DISTRO}/nvidia-docker.list | \
-  sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+  tee /etc/apt/sources.list.d/nvidia-docker.list
 apt-get update
 apt-get install -y nvidia-docker2
 echo '# END SECTION'
