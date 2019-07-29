@@ -118,7 +118,7 @@ other_supported_distros.each { distro ->
         cron('@daily')
       }
 
-      label "gpu-reliable"
+      label "gpu-nvidia-docker2"
 
       steps {
         shell("""\
@@ -143,7 +143,7 @@ other_supported_distros.each { distro ->
         cron('@daily')
       }
 
-      label "gpu-reliable"
+      label "gpu-nvidia-docker2"
 
       steps {
         shell("""\
