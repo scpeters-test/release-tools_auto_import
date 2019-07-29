@@ -6,6 +6,8 @@ SCRIPT_DIR="${SCRIPT_DIR%/*}"
 
 export GPU_SUPPORT_NEEDED=true
 export USE_DOCKER_IN_DOCKER=true
+# squid is blocking nvidia packages inside the dockerhub image
+export USE_SQUID=false
 
 . ${SCRIPT_DIR}/lib/_install_nvidia_docker.sh
 
