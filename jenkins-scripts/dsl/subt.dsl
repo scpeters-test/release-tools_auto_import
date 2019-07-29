@@ -105,6 +105,56 @@ other_supported_distros.each { distro ->
           scm('@daily')
         }
      }
+    // --------------------------------------------------------------
+    // 2. Install subt testing docker container testing
+    def install_docker_job = job("subt-install-docker_container-${distro}-${arch}")
+    OSRFLinuxInstall.create(install_docker_job)
+    // GPU label and parselog
+    include_parselog(install_docker_job)
+
+    install_docker_job.with
+    {
+      triggers {
+        cron('@daily')
+      }
+
+      label "gpu-reliable"
+
+      steps {
+        shell("""\
+            #!/bin/bash -xe
+
+            export DISTRO=${distro}
+            export ARCH=${arch}
+            /bin/bash -xe ./scripts/jenkins-scripts/docker/subt-docker_container-test-job.bash
+            """.stripIndent())
+      }
+    } // end of with
+    // --------------------------------------------------------------
+    // 3. Install subt testing dockerhub
+    def install_default_job = job("subt-install-dockerhub-${distro}-${arch}")
+    OSRFLinuxInstall.create(install_default_job)
+    // GPU label and parselog
+    include_parselog(install_default_job)
+
+    install_default_job.with
+    {
+      triggers {
+        cron('@daily')
+      }
+
+      label "gpu-reliable"
+
+      steps {
+        shell("""\
+            #!/bin/bash -xe
+
+            export DISTRO=${distro}
+            export ARCH=${arch}
+            /bin/bash -xe ./scripts/jenkins-scripts/docker/subt-dockerhub-test-job.bash
+            """.stripIndent())
+      }
+    }
   } // end of arch
 } // end of distro
 
