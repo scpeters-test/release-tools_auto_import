@@ -22,6 +22,6 @@ ${DOCKER2_CMD} -v \"/etc/localtime:/etc/localtime:ro\" -v \"/dev/input:/dev/inpu
 echo '# END SECTION'
 """
 
-export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common xauth"
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common xauth x11-xserver-utils"
 
 . ${SCRIPT_DIR}/lib/generic-install-base.bash
