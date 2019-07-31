@@ -17,7 +17,7 @@ echo '# BEGIN SECTION: testing by running dockerhub'
 ${INSTALL_NVIDIA_DOCKER2}
 
 xhost +
-timeout --preserve-status 300 ${DOCKER2_CMD} -v \"/etc/localtime:/etc/localtime:ro\" -v \"/dev/input:/dev/input\" --network host --privileged --security-opt seccomp=unconfined nkoenig/subt-virtual-testbed tunnel_circuit_practice.ign worldName:=tunnel_circuit_practice_01 robotName1:=X1 robotConfig1:=X1_SENSOR_CONFIG1
+timeout --preserve-status 300 ${DOCKER2_CMD} -v \"/etc/localtime:/etc/localtime:ro\" -v \"/dev/input:/dev/input\" --network host --privileged --security-opt seccomp=unconfined nkoenig/subt-virtual-testbed tunnel_circuit_practice.ign worldName:=tunnel_circuit_practice_01 robotName1:=X1 robotConfig1:=X1_SENSOR_CONFIG1 || true
 
 echo '# END SECTION'
 """
