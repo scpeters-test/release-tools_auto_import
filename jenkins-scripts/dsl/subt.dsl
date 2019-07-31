@@ -17,7 +17,8 @@ void include_parselog(Job job)
 {
   job.with
   {
-    publishers {
+    publishers
+    {
         consoleParsing {
             globalRules('/var/lib/jenkins/logparser_error_on_roslaunch_failed')
             failBuildOnError()
@@ -27,6 +28,10 @@ void include_parselog(Job job)
         consoleParsing {
             globalRules('/var/lib/jenkins/logparser_error_on_failed_compilation')
             failBuildOnError()
+        }
+        consoleParsing {
+            projectRules('scripts/jenkins-scripts/parser_rules/gazebo_err.parser')
+            failBuildOnError(true)
         }
     }
   }
