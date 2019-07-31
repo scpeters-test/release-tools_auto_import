@@ -10,7 +10,8 @@ export USE_DOCKER_IN_DOCKER=true
 . ${SCRIPT_DIR}/lib/_install_nvidia_docker.sh
 
 export INSTALL_JOB_POSTINSTALL_HOOK="""
-${INSTALL_NVIDIA_DOCKER1}
+${INSTALL_NVIDIA_DOCKER2}
+xhost +
 echo '# BEGIN SECTION: testing - download'
 cd $WORKSPACE
 mkdir -p ~/subt_docker/subt && cd ~/subt_docker/subt
@@ -32,6 +33,6 @@ touch /root/.Xauthority
 echo '# END SECTION'
 """
 
-export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common wget"
+export DEPENDENCY_PKGS="${DEPENDENCY_PKGS} software-properties-common wget x11-xserver-utils"
 
 . ${SCRIPT_DIR}/lib/generic-install-base.bash
