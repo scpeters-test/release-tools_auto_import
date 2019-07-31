@@ -7,7 +7,7 @@ def all_supported_distros = ci_distro + other_supported_distros
 def supported_arches = [ 'amd64' ]
 
 def ENABLE_TESTS = true
-def DISABLE_TESTS = true
+def DISABLE_TESTS = false
 def DISABLE_CPPCHECK = false
 // Globals.extra_emails = "caguero@osrfoundation.org"
 
