@@ -8,6 +8,7 @@ export GPU_SUPPORT_NEEDED=true
 export USE_DOCKER_IN_DOCKER=true
 
 . ${SCRIPT_DIR}/lib/_install_nvidia_docker.sh
+TEST_TIMEOUT=${TEST_TIMEOUT:-180}
 
 export INSTALL_JOB_POSTINSTALL_HOOK="""
 ${INSTALL_NVIDIA_DOCKER2}
