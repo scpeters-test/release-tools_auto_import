@@ -29,7 +29,23 @@ echo '# BEGIN SECTION: testing - build'
 echo '# END SECTION'
 echo '# BEGIN SECTION: testing - run'
 touch /root/.Xauthority
-./run.bash subt
+
+# inject external variable into test scripts
+if [[ -n "${TEST_TIMEOUT}" ]]; then
+  export TEST_TIMEOUT=${TEST_TIMEOUT}
+fi
+
+TEST_TIMEOUT=\${TEST_TIMEOUT:-180}
+TEST_TIMEOUT_KILL=\$((TEST_TIMEOUT + 30))
+TEST_START=\$(date +%s)
+timeout --preserve-status -k \${TEST_TIMEOUT_KILL} \$TEST_TIMEOUT ./run.sh subt
+TEST_END=\$(date +%s)
+DIFF=\$(expr \$TEST_END - \$TEST_START)
+
+if [ \$DIFF -lt \$TEST_TIMEOUT ]; then
+  echo \"The test took less than \$TEST_TIMEOUT. Something bad happened.\"
+  exit 1
+fi
 echo '# END SECTION'
 """
 

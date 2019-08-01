@@ -61,7 +61,6 @@ DIFF=\$(expr \$TEST_END - \$TEST_START)
 
 if [ \$DIFF -lt \$TEST_TIMEOUT ]; then
   echo \"The test took less than \$TEST_TIMEOUT. Something bad happened.\"
-  Typo
   exit 1
 fi
 """
