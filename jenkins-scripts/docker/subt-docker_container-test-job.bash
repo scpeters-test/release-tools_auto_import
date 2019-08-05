@@ -40,7 +40,7 @@ fi
 TEST_TIMEOUT=\${TEST_TIMEOUT:-180}
 TEST_TIMEOUT_KILL=\$((TEST_TIMEOUT + 30))
 TEST_START=\$(date +%s)
-timeout --preserve-status -k \${TEST_TIMEOUT_KILL} \$TEST_TIMEOUT /bin/bash -xe ./run.sh subt
+timeout --preserve-status -k \${TEST_TIMEOUT_KILL} \$TEST_TIMEOUT ./run.bash subt
 TEST_END=\$(date +%s)
 DIFF=\$(expr \$TEST_END - \$TEST_START)
 
