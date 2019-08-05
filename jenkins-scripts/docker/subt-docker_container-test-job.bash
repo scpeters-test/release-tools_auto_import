@@ -31,6 +31,9 @@ echo '# END SECTION'
 echo '# BEGIN SECTION: testing - run'
 touch /root/.Xauthority
 
+docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=/tmp/.docker.xauth -v /tmp/.docker.xauth:/tmp/.docker.xauth -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro -v /dev/input:/dev/input --network host --rm --privileged --security-opt seccomp=unconfined --gpus all subt
+
+
 # inject external variable into test scripts
 if [[ -n "${TEST_TIMEOUT}" ]]; then
   export TEST_TIMEOUT=${TEST_TIMEOUT}
