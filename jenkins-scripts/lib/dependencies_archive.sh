@@ -273,9 +273,6 @@ else
       kinetic)
         GAZEBO_VERSION_FOR_ROS="7"
       ;;
-      lunar)
-        GAZEBO_VERSION_FOR_ROS="7"
-      ;;
       melodic)
         GAZEBO_VERSION_FOR_ROS="9"
       ;;
@@ -283,6 +280,8 @@ else
       crystal)
         GAZEBO_VERSION_FOR_ROS="9"
       ;;
+      dashing)
+        GAZEBO_VERSION_FOR_ROS="9"
     esac
   fi
 
@@ -426,6 +425,9 @@ fi
 # IGNITION
 #
 
+IGN_MATH_DEPENDENCIES="libeigen3-dev \\
+                       libignition-cmake-dev \\
+                       libignition-cmake1-dev"
 if [[ ${DISTRO} != 'xenial' ]]; then
   IGN_MATH_DEPENDENCIES="${IGN_MATH_DEPENDENCIES} \\
                          libignition-cmake2-dev"
@@ -583,6 +585,11 @@ if [[ ${DISTRO} != 'xenial' ]]; then
                         libignition-transport6-dev"
 fi
 
+if [[ -n "${IGN_GUI_MAJOR_VERSION}" && ${IGN_GUI_MAJOR_VERSION} -eq 0 ]]; then
+  IGN_GUI_DEPENDENCIES="${IGN_GUI_DEPENDENCIES} \\
+                        libignition-rendering2-dev"
+fi
+
 if [[ -n "${IGN_GUI_MAJOR_VERSION}" && ${IGN_GUI_MAJOR_VERSION} -ge 2 ]]; then
   IGN_GUI_DEPENDENCIES="${IGN_GUI_DEPENDENCIES} \\
                         libignition-msgs4-dev \\
@@ -633,7 +640,8 @@ else
                            libignition-sensors2-dev  \\
                            libignition-fuel-tools3-dev \\
                            libignition-transport7-dev \\
-                           libwebsockets-dev"
+                           libwebsockets-dev \\
+                           binutils-dev"
 fi
 
 IGN_RENDERING_NO_IGN_DEPENDENCIES="${ogre_pkg}\\
@@ -710,11 +718,16 @@ IGN_RNDF_DEPENDENCIES="libignition-cmake-dev \\
 #
 # SUBT
 #
-SUBT_DEPENDENCIES="mercurial                               \\
-                   wget                                    \\
-                   curl                                    \\
-                   git                                     \\
-                   gazebo${GAZEBO_VERSION_FOR_ROS}         \\
-                   libgazebo${GAZEBO_VERSION_FOR_ROS}-dev  \\
-                   ${ROS_GAZEBO_PKGS}                      \\
-                   ${ROS_CATKIN_BASE}"
+SUBT_DEPENDENCIES="mercurial \\
+                   wget \\
+                   curl \\
+                   git  \\
+                   ${ROS_CATKIN_BASE} \\
+                   ignition-blueprint  \\
+                   ros-${ROS_DISTRO}-desktop \\
+                   ros-${ROS_DISTRO}-tf2-sensor-msgs \\
+                   ros-${ROS_DISTRO}-robot-localization \\
+                   ros-${ROS_DISTRO}-rotors-control \\
+                   ros-${ROS_DISTRO}-ros-control \\
+                   ros-${ROS_DISTRO}-twist-mux \\
+                   ros-${ROS_DISTRO}-ros1-ign-bridge"

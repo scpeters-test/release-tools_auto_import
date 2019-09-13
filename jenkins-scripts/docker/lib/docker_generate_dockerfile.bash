@@ -29,6 +29,32 @@ fi
 
 [[ -z ${USE_GCC8} ]] && USE_GCC8=false
 
+GZDEV_DIR=${WORKSPACE}/gzdev
+GZDEV_BRANCH=${GZDEV_BRANCH:-master}
+
+dockerfile_install_gzdev_repos()
+{
+cat >> Dockerfile << DELIM_OSRF_REPO_GIT
+RUN rm -fr ${GZDEV_DIR}
+RUN git clone --depth 1 https://github.com/osrf/gzdev -b ${GZDEV_BRANCH} ${GZDEV_DIR}
+DELIM_OSRF_REPO_GIT
+if [[ -n ${GZDEV_PROJECT_NAME} ]]; then
+# debian sid docker images does not return correct name so we need to use
+# force-linux-distro
+cat >> Dockerfile << DELIM_OSRF_REPO_GZDEV
+RUN ${GZDEV_DIR}/gzdev.py repository enable --project=${GZDEV_PROJECT_NAME} --force-linux-distro=${DISTRO} || ( git -C ${GZDEV_DIR} pull origin ${GZDEV_BRANCH} && \
+    ${GZDEV_DIR}/gzdev.py repository enable --project=${GZDEV_PROJECT_NAME} --force-linux-distro=${DISTRO} )
+DELIM_OSRF_REPO_GZDEV
+else
+for repo in ${OSRF_REPOS_TO_USE}; do
+cat >> Dockerfile << DELIM_OSRF_REPO
+RUN ${GZDEV_DIR}/gzdev.py repository enable osrf ${repo} --force-linux-distro=${DISTRO}  || ( git -C ${GZDEV_DIR} pull origin ${GZDEV_BRANCH} && \
+    ${GZDEV_DIR}/gzdev.py repository enable osrf ${repo} --force-linux-distro=${DISTRO} )
+DELIM_OSRF_REPO
+done
+fi
+}
+
 case ${LINUX_DISTRO} in
   'ubuntu')
     SOURCE_LIST_URL="http://archive.ubuntu.com/ubuntu"
@@ -150,20 +176,18 @@ DELIM_DOCKER_PAM_BUG
 fi
 
 # dirmngr from Yaketty on needed by apt-key
+# git and python-* for gzdev
 if [[ $DISTRO != 'xenial' ]]; then
+    # not in xenial, available from Bionic on and all debians
+    extra_python_mod="python3-distro"
+fi
 cat >> Dockerfile << DELIM_DOCKER_DIRMNGR
 RUN apt-get update && \\
-    apt-get install -y dirmngr
+    apt-get install -y dirmngr git python3 python3-docopt python3-yaml ${extra_python_mod}
 DELIM_DOCKER_DIRMNGR
-fi
 
-for repo in ${OSRF_REPOS_TO_USE}; do
-cat >> Dockerfile << DELIM_OSRF_REPO
-RUN echo "deb http://packages.osrfoundation.org/gazebo/${LINUX_DISTRO}-${repo} ${DISTRO} main" >\\
-                                                /etc/apt/sources.list.d/osrf.${repo}.list
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D2486D2DD83DB69272AFE98867170598AF249743
-DELIM_OSRF_REPO
-done
+# Install necessary repositories using gzdev
+dockerfile_install_gzdev_repos
 
 if ${USE_ROS_REPO}; then
   if ${ROS2}; then
@@ -256,17 +280,26 @@ RUN echo "${MONTH_YEAR_STR}" \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# This is killing the cache so we get the most recent packages if there
-# was any update. Note that we don't remove the apt/lists file here since
-# it will make to run apt-get update again
-RUN echo "Invalidating cache $(( ( RANDOM % 100000 )  + 1 ))" \
- && (apt-get update || (rm -rf /var/lib/apt/lists/* && apt-get update)) \
+# This is killing the cache so we get the most recent packages if there was any
+# update.
+RUN echo "Invalidating cache $(( ( RANDOM % 100000 )  + 1 ))"
+DELIM_DOCKER3
+
+# A new install of gzdev is needed to update to possible recent changes in
+# configuratin and/or code and not being used since the docker cache did
+# not get them.
+dockerfile_install_gzdev_repos
+
+cat >> Dockerfile << DELIM_DOCKER31
+# Note that we don't remove the apt/lists file here since it will make
+# to run apt-get update again
+RUN (apt-get update || (rm -rf /var/lib/apt/lists/* && apt-get update)) \
  && apt-get dist-upgrade -y \
  && apt-get clean
 
 # Map the workspace into the container
 RUN mkdir -p ${WORKSPACE}
-DELIM_DOCKER3
+DELIM_DOCKER31
 
 # Beware of moving this code since it needs to run update-alternative after
 # installing the default compiler in PACKAGES_CACHE_AND_CHECK_UPDATES
@@ -279,7 +312,8 @@ cat >> Dockerfile << DELIM_GCC8
 DELIM_GCC8
 fi
 
-cat >> Dockerfile << DELIM_DOCKER_SQUID
+if ${USE_SQUID}; then
+  cat >> Dockerfile << DELIM_DOCKER_SQUID
 # If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
 # By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
 RUN route -n | awk '/^0.0.0.0/ {print \$2}' > /tmp/host_ip.txt
@@ -288,6 +322,7 @@ RUN echo "HEAD /" | nc \$(cat /tmp/host_ip.txt) 8000 | grep squid-deb-proxy \
   && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
   || echo "No squid-deb-proxy detected on docker host"
 DELIM_DOCKER_SQUID
+fi
 
 if [[ -n ${SOFTWARE_DIR} ]]; then
 cat >> Dockerfile << DELIM_DOCKER4
@@ -297,15 +332,27 @@ fi
 
 if $USE_GPU_DOCKER; then
  if [[ $GRAPHIC_CARD_NAME == "Nvidia" ]]; then
- # NVIDIA is using nvidia_docker integration
-cat >> Dockerfile << DELIM_NVIDIA_GPU
+   if $NVIDIA_DOCKER2_NODE; then
+   # NVIDIA is using nvidia_docker2 integration
+   cat >> Dockerfile << DELIM_NVIDIA2_GPU
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+DELIM_NVIDIA2_GPU
+   else
+   # NVIDIA-DOCKER1
+   cat >> Dockerfile << DELIM_NVIDIA_GPU
+# nvidia-container-runtime
 LABEL com.nvidia.volumes.needed="nvidia_driver"
 ENV PATH /usr/local/nvidia/bin:\${PATH}
 ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:\${LD_LIBRARY_PATH}
 DELIM_NVIDIA_GPU
-  else
+   fi
+ else
   # No NVIDIA cards needs to have the same X stack than the host
-cat >> Dockerfile << DELIM_DISPLAY
+  cat >> Dockerfile << DELIM_DISPLAY
 # Check to be sure version of kernel graphic card support is the same.
 # It will kill DRI otherwise
 RUN CHROOT_GRAPHIC_CARD_PKG_VERSION=\$(dpkg -l | grep "^ii.*${GRAPHIC_CARD_PKG}\ " | awk '{ print \$3 }' | sed 's:-.*::') \\

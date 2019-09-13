@@ -14,12 +14,14 @@ if [[ -z ${DISTRO} ]]; then
   exit 1
 fi
 
-export GAZEBO_BASE_TESTS_HOOK="""
-echo '# BEGIN SECTION: PERFORMANCE testing'
-make test ARGS=\"-VV -R PERFORMANCE_*\" || true
+. ${SCRIPT_DIR}/lib/_subt_utils.sh
+
+export ROS_SETUP_POSTINSTALL_HOOK="""
+echo '# BEGIN SECTION: smoke test'
+source ./install/setup.bash || true
+${SUBT_COMPETITION_TEST}
+echo 'Smoke testing completed successfully.'
 echo '# END SECTION'
 """
 
-# Can not use generic compilation since we host the DART instalation and some
-# other logic based of every gazebo version
-. ${SCRIPT_DIR}/lib/gazebo-base-default.bash
+. ${SCRIPT_DIR}/lib/subt-compilation-base.bash

@@ -8,7 +8,6 @@ def nightly_sdformat_branch = [ 'sdformat7' ]
 // Main platform using for quick CI
 def ci_distro               = Globals.get_ci_distro()
 def abi_distro              = Globals.get_abi_distro()
-def performance_box         = Globals.get_performance_box()
 // Other supported platform to be checked but no for quick
 // CI integration.
 def other_supported_distros = Globals.get_other_supported_distros()
@@ -257,10 +256,6 @@ sdformat_supported_branches.each { branch ->
 
          def dev_package = "lib${branch}-dev"
 
-         extra_repos_str=""
-         if (branch in sdformat_gz11_branches)
-           extra_repos_str="prerelease"
-
          steps {
           shell("""\
                 #!/bin/bash -xe
@@ -268,7 +263,7 @@ sdformat_supported_branches.each { branch ->
                 export DISTRO=${distro}
                 export ARCH=${arch}
                 export INSTALL_JOB_PKG=${dev_package}
-                export INSTALL_JOB_REPOS="stable ${extra_repos_str}"
+                export GZDEV_PROJECT_NAME="${branch}"
                 /bin/bash -x ./scripts/jenkins-scripts/docker/generic-install-test-job.bash
                 """.stripIndent())
           }
@@ -276,35 +271,6 @@ sdformat_supported_branches.each { branch ->
     } // end of arch
   } // end of distro
 } // end of branch
-
-// --------------------------------------------------------------
-// PERFORMANCE: linux performance test
-[ Globals.get_gz11_ubuntu_distro() ].each { distro ->
-  supported_arches.each { arch ->
-    def performance_job = job("sdformat-performance-default-${distro}-${arch}")
-    OSRFLinuxPerformance.create(performance_job)
-    OSRFBitbucketHg.create(performance_job, "https://bitbucket.org/osrf/sdformat")
-
-    performance_job.with
-    {
-      label "${performance_box}"
-
-      triggers {
-        scm('@daily')
-      }
-
-      steps {
-        shell("""\
-              #!/bin/bash -xe
-
-              export DISTRO=${distro}
-              export ARCH=${arch}
-              /bin/bash -xe ./scripts/jenkins-scripts/docker/sdformat-compilation.bash
-              """.stripIndent())
-      } // end of steps
-    } // end of with
-  } // end of arch
-} // end of distro
 
 // --------------------------------------------------------------
 // DEBBUILD: linux package builder

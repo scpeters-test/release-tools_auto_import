@@ -14,7 +14,6 @@ def ubuntu_official_packages_distros = [ 'bionic' : 'gazebo9',
 def ci_distro               = Globals.get_ci_distro()
 def ci_gpu                  = Globals.get_ci_gpu()
 def abi_distro              = Globals.get_abi_distro()
-def performance_box         = Globals.get_performance_box()
 // Other supported platform to be checked but no for quick
 // CI integration.
 def other_supported_distros = Globals.get_other_supported_distros()
@@ -41,7 +40,7 @@ boolean is_watched_by_buildcop(branch, distro = 'xenial', gpu = 'nvidia')
   return false
 }
 
-void generate_install_job(Job job, gz_branch, distro, arch, osrf_repos = "")
+void generate_install_job(Job job, gz_branch, distro, arch, use_osrf_repos = false)
 {
   job.with
   {
@@ -51,6 +50,10 @@ void generate_install_job(Job job, gz_branch, distro, arch, osrf_repos = "")
 
     // Branch is exactly in the form of gazeboN
     def dev_packages = "lib${gz_branch}-dev ${gz_branch}"
+
+    def gzdev_str = ""
+    if (use_osrf_repos)
+        gzdev_str = "export GZDEV_PROJECT_NAME=${gz_branch}"
 
     // Need gpu for running the runtime test
     label "gpu-reliable"
@@ -62,7 +65,8 @@ void generate_install_job(Job job, gz_branch, distro, arch, osrf_repos = "")
           export DISTRO=${distro}
           export ARCH=${arch}
           export INSTALL_JOB_PKG=\"${dev_packages}\"
-          export INSTALL_JOB_REPOS=${osrf_repos}
+          ${gzdev_str}
+
           /bin/bash -x ./scripts/jenkins-scripts/docker/gazebo-install-test-job.bash
           """.stripIndent())
     }
@@ -469,7 +473,7 @@ gazebo_supported_branches.each { branch ->
       def install_default_job = job("gazebo-install-${branch}_pkg-${distro}-${arch}")
       OSRFLinuxInstall.create(install_default_job)
 
-      generate_install_job(install_default_job, branch, distro, arch, "stable")
+      generate_install_job(install_default_job, branch, distro, arch, true)
     } // end of arch
   } // end of distro
 } // end of branch
@@ -485,38 +489,6 @@ ubuntu_official_packages_distros.each { distro, branch ->
     generate_install_job(install_default_job, branch, distro, arch)
   } // end of arch
 } // end of branch
-
-// --------------------------------------------------------------
-// PERFORMANCE: linux performance test
-ci_distro.each { distro ->
-  supported_arches.each { arch ->
-    def performance_job = job("gazebo-performance-default-${distro}-${arch}")
-    OSRFLinuxPerformance.create(performance_job)
-    OSRFBitbucketHg.create(performance_job, "https://bitbucket.org/osrf/gazebo")
-
-    performance_job.with
-    {
-      label "${performance_box}"
-
-      label "gpu-" + ci_gpu[0] + "-${distro}"
-
-      triggers {
-        scm('@daily')
-      }
-
-      steps {
-        shell("""\
-              #!/bin/bash -xe
-
-              export DISTRO=${distro}
-              export ARCH=${arch}
-              export GPU_SUPPORT_NEEDED=true
-              /bin/bash -xe ./scripts/jenkins-scripts/docker/gazebo-performance.bash
-              """.stripIndent())
-      } // end of steps
-    } // end of with
-  } // end of arch
-} // end of distro
 
 // --------------------------------------------------------------
 // DEBBUILD: linux package builder
