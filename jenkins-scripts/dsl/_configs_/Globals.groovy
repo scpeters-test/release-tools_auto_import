@@ -10,7 +10,8 @@ class Globals
    static rtools_description = true
    static gazebodistro_branch = false
 
-   static gpu_by_distro  = [ xenial  : [ 'nvidia' ] ]
+   static gpu_by_distro  = [ xenial  : [ 'nvidia' ] ,
+                             bionic  : [ 'nvidia' ]]
 
    static ros_ci = [ 'kinetic'  : ['xenial'] ,
                      'melodic'  : ['bionic'] ,
@@ -48,11 +49,6 @@ class Globals
       }
 
       return default_emails
-   }
-
-   static String get_performance_box()
-   {
-      return 'maria.intel.trusty'
    }
 
    // -- Officially support distributions for ign, sdformat and gazebo --
