@@ -104,7 +104,7 @@ case \${BUILD_METHOD} in
         else
           checkout_cmd="hg clone https://bitbucket.org/${BITBUCKET_REPO}/$PACKAGE-release"
         fi
-        \$checkout_cmd \\ 
+        \$checkout_cmd \\
 	    -b \${RELEASE_BASE_BRANCH} \\
 	    /tmp/base_$PACKAGE-release
 	# 2. Overwrite the information
