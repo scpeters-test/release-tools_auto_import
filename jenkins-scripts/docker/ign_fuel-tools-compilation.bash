@@ -35,4 +35,6 @@ if [[ ${IGN_FUEL_TOOLS_MAJOR_VERSION} -eq 4 ]]; then
   export IGN_MSGS_BRANCH=default
 fi
 
+export GZDEV_PROJECT_NAME="ignition-fuel-tools${IGN_FUEL_TOOLS_MAJOR_VERSION}"
+
 . ${SCRIPT_DIR}/lib/generic-building-base.bash
