@@ -17,6 +17,10 @@ fi
 export BUILDING_SOFTWARE_DIRECTORY="ign-rendering"
 export BUILDING_PKG_DEPENDENCIES_VAR_NAME="IGN_RENDERING_DEPENDENCIES"
 
+if [[ $(date +%Y%m%d) -le 20200831 ]]; then
+  export BUILDING_JOB_REPOSITORIES="${BUILDING_JOB_REPOSITORIES} prerelease"
+fi
+
 # Identify IGN_RENDERING_MAJOR_VERSION to help with dependency resolution
 IGN_RENDERING_MAJOR_VERSION=$(\
   python ${SCRIPT_DIR}/../tools/detect_cmake_major_version.py \
