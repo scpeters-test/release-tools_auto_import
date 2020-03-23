@@ -124,6 +124,9 @@ cat >> Dockerfile << DELIM_DOCKER_ARCH
                                                          >> /etc/apt/sources.list && \\
       echo "deb ${SOURCE_LIST_URL} ${DISTRO}-security main restricted universe multiverse" && \\
                                                          >> /etc/apt/sources.list
+
+  # TODO(sloretz) delete this, just for debugging
+  RUN cat /etc/apt/sources.list
 DELIM_DOCKER_ARCH
   fi
 fi
