@@ -329,6 +329,11 @@ DELIM_WORKAROUND_POST_HOOK
 fi
 
 cat >> Dockerfile << DELIM_WORKAROUND_91
+# Need locale-gen command below
+RUN apt-get update && apt-get install -y \\
+      locales \\
+    && rm -rf /var/lib/apt/lists/*
+
 # Workaround to issue:
 # https://bitbucket.org/osrf/handsim/issue/91
 RUN echo "en_GB.utf8 UTF-8" >> /etc/locale.gen
