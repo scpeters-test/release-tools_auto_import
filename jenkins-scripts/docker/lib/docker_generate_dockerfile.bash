@@ -118,12 +118,9 @@ if [[ ${LINUX_DISTRO} == 'ubuntu' ]]; then
 cat >> Dockerfile << DELIM_DOCKER_ARCH
   # Note that main,restricted and universe are not here, only multiverse
   # main, restricted and unvierse are already setup in the original image
-  RUN echo "deb ${SOURCE_LIST_URL} ${DISTRO} multiverse" \\
-                                                         >> /etc/apt/sources.list && \\
-      echo "deb ${SOURCE_LIST_URL} ${DISTRO}-updates main restricted universe multiverse" \\
-                                                         >> /etc/apt/sources.list && \\
-      echo "deb ${SOURCE_LIST_URL} ${DISTRO}-security main restricted universe multiverse" && \\
-                                                         >> /etc/apt/sources.list
+  RUN apt-add-repository "deb ${SOURCE_LIST_URL} ${DISTRO} multiverse" && \\
+      apt-add-repository "deb ${SOURCE_LIST_URL} ${DISTRO}-updates main restricted universe multiverse" && \\
+      apt-add-repository "deb ${SOURCE_LIST_URL} ${DISTRO}-security main restricted universe multiverse"\\
 
   # TODO(sloretz) delete this, just for debugging
   RUN cat /etc/apt/sources.list
