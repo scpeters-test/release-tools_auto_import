@@ -116,6 +116,11 @@ fi
 if [[ ${LINUX_DISTRO} == 'ubuntu' ]]; then
   if [[ ${ARCH} != 'armhf' && ${ARCH} != 'arm64' ]]; then
 cat >> Dockerfile << DELIM_DOCKER_ARCH
+  # Use apt-add-repository to avoid adding duplicate sources
+  RUN apt-get update && apt-get install -y \\
+        apt-add-repository \\
+      && rm -rf /var/lib/apt/lists/*
+
   # Note that main,restricted and universe are not here, only multiverse
   # main, restricted and unvierse are already setup in the original image
   RUN apt-add-repository "deb ${SOURCE_LIST_URL} ${DISTRO} multiverse" && \\
